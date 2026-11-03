@@ -98,6 +98,8 @@ The following commands are currently registered:
 
 **Note:** These commands currently demonstrate command registration and function routing. Their actual feature functionality is still under development.
 
+When DevKit is executed without a subcommand, it displays the general CLI help information.
+
 ## Getting Started
 
 ### Requirements
@@ -105,29 +107,47 @@ The following commands are currently registered:
 - Python 3.11 or later is the intended development baseline.
 - Git.
 
-### Running the CLI
+### Installation
 
 Clone the repository:
 
-    git clone https://github.com/ReginaChijioke/DevKit-cli.git
+```bash
+git clone https://github.com/ReginaChijioke/DevKit-cli.git
+```
 
 Navigate into the project directory:
 
-    cd DevKit-cli
+```bash
+cd DevKit-cli
+```
 
-Run the CLI using Python:
+### Running the CLI
 
-    python3 -m devkit.cli --help
+Display general help:
+
+```bash
+python3 -m devkit.cli
+```
+
+Display available commands:
+
+```bash
+python3 -m devkit.cli --help
+```
 
 Run an individual command:
 
-    python3 -m devkit.cli doctor
+```bash
+python3 -m devkit.cli doctor
+```
 
 Other available commands:
 
-    python3 -m devkit.cli init
-    python3 -m devkit.cli docs
-    python3 -m devkit.cli inspect
+```bash
+python3 -m devkit.cli init
+python3 -m devkit.cli docs
+python3 -m devkit.cli inspect
+```
 
 ## Technology Stack
 
@@ -174,7 +194,7 @@ Development will follow an incremental approach:
 |---|---|---|
 | 1 | Repository, project structure, and initial documentation | Completed |
 | 2 | CLI foundation, subcommand registration, and command routing | Completed |
-| 3 | Environment Doctor | Planned |
+| 3 | Environment Doctor | In Progress |
 | 4 | Project Generator | Planned |
 | 5 | Documentation Generation | Planned |
 | 6 | Project Doctor | Planned |
@@ -214,7 +234,7 @@ DevKit CLI will follow these principles:
 
 ## Project Status
 
-**Current stage:** CLI foundation and command routing.
+**Current stage:** CLI foundation completed; beginning Environment Doctor implementation.
 
 **Completed:**
 - Initial repository and project structure.
@@ -225,11 +245,12 @@ DevKit CLI will follow these principles:
 - Association of each subcommand with its respective function.
 - Basic command execution and routing.
 - Successful manual testing of all four commands.
-- Successful display of the CLI help output using `--help`.
+- Successful display of CLI help using `--help`.
+- Default help behaviour when the CLI is executed without a command.
 
 **Currently in progress:**
-- Improving default behaviour when the CLI is run without a command.
-- Preparing the foundation for implementing the first core feature.
+- Beginning implementation of Environment Doctor.
+- Preparing environment diagnostic checks.
 
 **Not yet implemented:**
 - Environment Doctor functionality.

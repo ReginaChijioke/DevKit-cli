@@ -143,3 +143,50 @@ Retested the `doctor` command successfully.
 ### 13. Next Development Milestone
 
 Improve the default CLI behaviour when no subcommand is supplied, then begin implementing the actual functionality behind the registered commands.
+
+## 3 November 2026 — CLI Behaviour Refinement
+
+### 9:46 AM WAT — Default CLI Help Behaviour
+
+**Objective:**
+
+Improve the default behaviour of DevKit CLI when the application is executed without specifying a subcommand.
+
+**Work completed:**
+- Identified that running the CLI without a command resulted in no output.
+- Introduced an `else` branch to handle situations where no command function is attached to the parsed arguments.
+- Implemented `parser.print_help()` to display general CLI usage information.
+- Preserved the existing command execution and routing logic.
+
+**Concepts explored:**
+- Conditional branching using `if` and `else`.
+- Method references versus method calls.
+- Executing methods using parentheses.
+- Default application behaviour.
+- Improving command-line user experience.
+
+**Testing:**
+
+Executed:
+
+`python3 -m devkit.cli`
+
+**Result:** Successfully displayed the general CLI help information.
+
+Also verified that:
+
+`python3 -m devkit.cli doctor`
+
+Continued to execute the Environment Doctor placeholder function correctly.
+
+**Outcome:**
+
+DevKit CLI now displays useful usage information when launched without a subcommand instead of exiting silently.
+
+The four registered subcommands and their existing routing behaviour remain functional.
+
+**Next steps:**
+- Begin implementing the Environment Doctor.
+- Check Python installation and version.
+- Expand environment diagnostics incrementally.
+- Introduce automated tests as functionality develops.

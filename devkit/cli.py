@@ -29,4 +29,5 @@ parsed_argument = parser.parse_args()
 if hasattr(parsed_argument, "func"):
     getattr(parsed_argument, "func")()
 else:
-    
+    parser.print_help()
+

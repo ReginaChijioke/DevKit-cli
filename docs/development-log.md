@@ -190,3 +190,28 @@ The four registered subcommands and their existing routing behaviour remain func
 - Check Python installation and version.
 - Expand environment diagnostics incrementally.
 - Introduce automated tests as functionality develops.
+
+### 5:02 PM WAT — Initial Environment Diagnostics
+
+**Work completed:**
+- Implemented a Python availability check using `subprocess.run()`.
+- Captured and processed Python version output.
+- Added validation to ensure Python 3.11 or newer is available.
+- Added exception handling for missing Python executables.
+- Implemented a Git repository check using `git status`.
+- Added exception handling for missing Git executables.
+- Organized Python and Git checks into separate `try/except` blocks.
+
+**Testing performed:**
+- Confirmed Python 3.12.3 is detected and meets the minimum version requirement.
+- Tested the missing-Python executable scenario.
+- Confirmed Git repository detection works in the DevKit project directory.
+
+**Design decision:**
+DevKit will not automatically initialize Git when a directory is not a repository. It will ask the user for permission before running `git init`.
+
+**Next steps:**
+- Improve Git error detection.
+- Implement the interactive Git initialization prompt.
+- Expand Environment Doctor diagnostics.
+- Add automated tests.

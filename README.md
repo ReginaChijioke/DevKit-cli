@@ -47,17 +47,28 @@ The initial version of DevKit CLI will focus on four major features.
 
 Checks the developer's local environment to determine whether the necessary development tools and configurations are available.
 
+**Implemented capabilities:**
+
+- Check Python availability.
+- Detect the installed Python version.
+- Verify that Python 3.11 or newer is available.
+- Handle cases where the Python executable cannot be found.
+- Check whether Git is installed and accessible.
+- Determine whether the current directory is a Git repository.
+
 **Planned capabilities:**
-- Check Python installation and version.
-- Verify the availability of selected development tools.
-- Identify missing dependencies or configuration issues.
-- Provide clear diagnostic messages and recommendations.
+
+- Improve Git error detection.
+- Ask for user permission before initializing Git in a directory.
+- Verify additional development tools and configurations.
+- Provide more detailed diagnostic messages and recommendations.
 
 ### 2. Project Generator
 
 Automates the creation of standardized Python project structures.
 
 **Planned capabilities:**
+
 - Generate a predefined Python project directory structure.
 - Create essential starter files.
 - Provide a consistent starting point for new projects.
@@ -68,6 +79,7 @@ Automates the creation of standardized Python project structures.
 Simplifies the creation of basic project documentation.
 
 **Planned capabilities:**
+
 - Generate starter README files.
 - Include common documentation sections.
 - Allow project-specific information to be included.
@@ -78,6 +90,7 @@ Simplifies the creation of basic project documentation.
 Inspects existing Python projects and identifies common structural or configuration issues.
 
 **Planned capabilities:**
+
 - Check for expected project files and directories.
 - Identify missing or incorrectly organized components.
 - Report potential configuration issues.
@@ -91,12 +104,10 @@ The following commands are currently registered:
 
 | Command | Purpose | Current Behaviour |
 |---|---|---|
-| `doctor` | Environment Doctor | Displays the Environment Doctor introduction. |
+| `doctor` | Environment Doctor | Checks Python availability and version, and checks Git availability and repository initialization. |
 | `init` | Project Generator | Displays the Project Generator introduction. |
 | `docs` | Documentation Generation | Displays the Documentation Generator introduction. |
 | `inspect` | Project Doctor | Displays the Project Doctor introduction. |
-
-**Note:** These commands currently demonstrate command registration and function routing. Their actual feature functionality is still under development.
 
 When DevKit is executed without a subcommand, it displays the general CLI help information.
 
@@ -105,7 +116,7 @@ When DevKit is executed without a subcommand, it displays the general CLI help i
 ### Requirements
 
 - Python 3.11 or later is the intended development baseline.
-- Git.
+- Git is used for version control and collaboration.
 
 ### Installation
 
@@ -219,6 +230,13 @@ Planned testing coverage includes:
 - Unexpected command failures.
 - Invalid CLI arguments and command behaviour.
 
+**Current testing progress:**
+
+- Manually tested Python version detection.
+- Confirmed the minimum Python version check works.
+- Tested the missing-Python executable scenario.
+- Manually tested Git repository detection.
+
 Automated tests have not yet been implemented.
 
 ## Design Principles
@@ -234,9 +252,10 @@ DevKit CLI will follow these principles:
 
 ## Project Status
 
-**Current stage:** CLI foundation completed; beginning Environment Doctor implementation.
+**Current stage:** CLI foundation completed; initial Environment Doctor diagnostics implemented.
 
 **Completed:**
+
 - Initial repository and project structure.
 - Python package initialization.
 - Basic command-line argument parser using `argparse`.
@@ -247,13 +266,20 @@ DevKit CLI will follow these principles:
 - Successful manual testing of all four commands.
 - Successful display of CLI help using `--help`.
 - Default help behaviour when the CLI is executed without a command.
+- Python availability and version check.
+- Minimum Python version validation (3.11).
+- Exception handling for missing Python executables.
+- Git repository initialization check.
+- Exception handling for missing Git executables.
 
 **Currently in progress:**
-- Beginning implementation of Environment Doctor.
-- Preparing environment diagnostic checks.
+
+- Improving Environment Doctor diagnostics.
+- Implementing interactive Git initialization with user permission.
+- Expanding environment checks.
 
 **Not yet implemented:**
-- Environment Doctor functionality.
+
 - Project Generator functionality.
 - Documentation Generation functionality.
 - Project Doctor functionality.

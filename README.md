@@ -2,7 +2,7 @@
 
 **Build consistently. Develop confidently.**
 
-A Python-first command-line setup assistant designed to simplify project initialization, environment configuration, and project documentation.
+A Python-first command-line setup assistant designed to simplify project initialization, environment configuration, documentation generation, and project inspection.
 
 ## Overview
 
@@ -10,7 +10,7 @@ DevKit CLI is a command-line tool designed to help developers reduce the repetit
 
 Starting a new project often involves manually creating directories, configuring development environments, preparing documentation, and checking project structures. These tasks can be time-consuming and may lead to inconsistent setups.
 
-DevKit CLI aims to simplify these processes by providing a collection of commands that automate common project setup and inspection tasks.
+DevKit CLI aims to simplify these processes through a collection of commands that automate common project setup and inspection tasks.
 
 The goal is to make starting and managing Python projects easier, more consistent, and less error-prone.
 
@@ -26,7 +26,7 @@ Developers frequently repeat the same setup procedures when starting new project
 
 Performing these tasks manually can introduce unnecessary complexity, especially for beginners and developers managing multiple projects.
 
-DevKit CLI aims to address this problem by bringing these essential setup and inspection tasks into one simple command-line tool.
+DevKit CLI aims to address this problem by bringing essential setup and inspection tasks into one simple command-line tool.
 
 ## Project Objectives
 
@@ -83,6 +83,72 @@ Inspects existing Python projects and identifies common structural or configurat
 - Report potential configuration issues.
 - Provide actionable recommendations for improvement.
 
+## Current CLI Commands
+
+The initial command-line structure has been established using Python's `argparse` module.
+
+The following commands are currently registered:
+
+| Command | Purpose | Current Behaviour |
+|---|---|---|
+| `doctor` | Environment Doctor | Displays the Environment Doctor introduction. |
+| `init` | Project Generator | Displays the Project Generator introduction. |
+| `docs` | Documentation Generation | Displays the Documentation Generator introduction. |
+| `inspect` | Project Doctor | Displays the Project Doctor introduction. |
+
+**Note:** These commands currently demonstrate command registration and function routing. Their actual feature functionality is still under development.
+
+When DevKit is executed without a subcommand, it displays the general CLI help information.
+
+## Getting Started
+
+### Requirements
+
+- Python 3.11 or later is the intended development baseline.
+- Git.
+
+### Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/ReginaChijioke/DevKit-cli.git
+```
+
+Navigate into the project directory:
+
+```bash
+cd DevKit-cli
+```
+
+### Running the CLI
+
+Display general help:
+
+```bash
+python3 -m devkit.cli
+```
+
+Display available commands:
+
+```bash
+python3 -m devkit.cli --help
+```
+
+Run an individual command:
+
+```bash
+python3 -m devkit.cli doctor
+```
+
+Other available commands:
+
+```bash
+python3 -m devkit.cli init
+python3 -m devkit.cli docs
+python3 -m devkit.cli inspect
+```
+
 ## Technology Stack
 
 The project will primarily use:
@@ -111,7 +177,7 @@ DevKit CLI is intended for:
 
 The initial release will focus exclusively on Python project workflows.
 
-The first version will prioritize the four core features:
+The first version will prioritize four core features:
 
 1. Environment Doctor.
 2. Project Generator.
@@ -126,12 +192,12 @@ Development will follow an incremental approach:
 
 | Phase | Focus | Status |
 |---|---|---|
-| 1 | Repository and project documentation setup | In progress |
-| 2 | Environment Doctor | Planned |
-| 3 | Project Generator | Planned |
-| 4 | Documentation Generation | Planned |
-| 5 | Project Doctor | Planned |
-| 6 | CLI integration and command handling | Planned |
+| 1 | Repository, project structure, and initial documentation | Completed |
+| 2 | CLI foundation, subcommand registration, and command routing | Completed |
+| 3 | Environment Doctor | In Progress |
+| 4 | Project Generator | Planned |
+| 5 | Documentation Generation | Planned |
+| 6 | Project Doctor | Planned |
 | 7 | Testing, debugging, and refinement | Planned |
 
 The roadmap may be adjusted as development progresses and feedback is received.
@@ -142,7 +208,7 @@ Testing will be an important part of development.
 
 The project will use Python's `unittest` framework to verify functionality and handle expected edge cases.
 
-Testing will cover areas such as:
+Planned testing coverage includes:
 
 - Missing development tools.
 - Unsupported Python versions.
@@ -151,8 +217,9 @@ Testing will cover areas such as:
 - Filesystem permission errors.
 - Missing project files and directories.
 - Unexpected command failures.
+- Invalid CLI arguments and command behaviour.
 
-The aim is to ensure that DevKit CLI behaves predictably and provides useful feedback when something goes wrong.
+Automated tests have not yet been implemented.
 
 ## Design Principles
 
@@ -167,11 +234,32 @@ DevKit CLI will follow these principles:
 
 ## Project Status
 
-**Current stage:** Initial repository setup and documentation.
+**Current stage:** CLI foundation completed; beginning Environment Doctor implementation.
 
-The four core features are currently planned and have not yet been implemented.
+**Completed:**
+- Initial repository and project structure.
+- Python package initialization.
+- Basic command-line argument parser using `argparse`.
+- Application description configuration.
+- Registration of the four core CLI subcommands.
+- Association of each subcommand with its respective function.
+- Basic command execution and routing.
+- Successful manual testing of all four commands.
+- Successful display of CLI help using `--help`.
+- Default help behaviour when the CLI is executed without a command.
 
-This README will be updated throughout development to reflect completed features, new commands, usage instructions, testing results, and any changes to project scope.
+**Currently in progress:**
+- Beginning implementation of Environment Doctor.
+- Preparing environment diagnostic checks.
+
+**Not yet implemented:**
+- Environment Doctor functionality.
+- Project Generator functionality.
+- Documentation Generation functionality.
+- Project Doctor functionality.
+- Automated test suite.
+
+This README will be updated throughout development to reflect completed features, new commands, usage instructions, testing results, and changes to project scope.
 
 ## Collaboration
 

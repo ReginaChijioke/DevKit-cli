@@ -1,5 +1,6 @@
 import argparse 
 import subprocess 
+import sys 
 parser = argparse.ArgumentParser(
     description="A developer-focused CLI application for project setup, environment diagnostics, documentation generation, and project inspection."
 )
@@ -11,35 +12,13 @@ register_docs = sub_parser.add_parser("docs")
 register_inspect = sub_parser.add_parser("inspect")
 
 def run_doctor():
-    try:
-
-        result = subprocess.run(
-            ["python3" , "--version"],
-            capture_output=True,
-            text=True
-        )
-
-        if result.returncode == 0:
-            python_version = result.stdout.strip()
-            print(python_version)
-            split_string = python_version.split()
-            version_number = split_string[1]
-            version_parts = version_number.split(".")
-            converted_numbers = []
-            for part in version_parts:
-                convert_part = int(part)
-                converted_numbers.append(convert_part)
-            detected_version = tuple(converted_numbers)
-
-            if detected_version >= (3, 11, 0):
-                print("Python version meets the requirement.")
-            else:
-                print("Python 3.11 or newer is required.")
-        else:
-            print("Python version check failed.")
-    except FileNotFoundError:
-        print("Python could not be found.")
-
+    system_version = sys.version_info
+    if system_version >= (3, 11, 0):
+        print(f"Python version: {system_version.major}.{system_version.minor}.{system_version.micro}")
+        print("Python version meets the requirement.")
+    else:
+        print("Python 3.11 or newer is required.")
+    
     try:
         git_result = subprocess.run(
             ["git", "status"],
@@ -50,7 +29,12 @@ def run_doctor():
         if git_result.returncode == 0:
             print("Git repository detected.")
         else:
-            print("This directory is not a Git repository.")
+            error_message = git_result.stderr
+            if "not a git repository" in error_message:
+                print("This directory is not a Git repository.")
+            else:
+                print("Git encountered an error.")
+                print(error_message)
     except FileNotFoundError:
         print("Git is not installed or could not be found.")
 register_doctor.set_defaults(func=run_doctor)
@@ -69,9 +53,12 @@ def run_inspect():
     print("DevKit Project Doctor")
 register_inspect.set_defaults(func=run_inspect)
 
-parsed_argument = parser.parse_args()
-if hasattr(parsed_argument, "func"):
-    getattr(parsed_argument, "func")()
-else:
-    parser.print_help()
+def main():
+    parsed_argument = parser.parse_args()
+    if hasattr(parsed_argument, "func"):
+        getattr(parsed_argument, "func")()
+    else:
+        parser.print_help()
 
+if __name__ == "__main__":
+    main()

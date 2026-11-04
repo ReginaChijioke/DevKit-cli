@@ -41,27 +41,27 @@ The primary objectives of DevKit CLI are to:
 
 ## Core Features
 
-The initial version of DevKit CLI will focus on four major features.
+The initial version of DevKit CLI focuses on four major features.
 
 ### 1. Environment Doctor
 
-Checks the developer's local environment to determine whether the necessary development tools and configurations are available.
+Checks the developer's active Python environment and verifies Git availability and repository status.
 
 **Implemented capabilities:**
 
-- Check Python availability.
-- Detect the installed Python version.
-- Verify that Python 3.11 or newer is available.
-- Handle cases where the Python executable cannot be found.
-- Check whether Git is installed and accessible.
-- Determine whether the current directory is a Git repository.
+- Detect the Python version of the interpreter currently running DevKit using `sys.version_info`.
+- Display the detected Python version.
+- Verify that the active interpreter meets the Python 3.11 minimum requirement.
+- Identify whether the current directory is a Git repository.
+- Handle cases where Git is unavailable.
+- Distinguish between directories that are not Git repositories and other Git-related errors.
+- Provide diagnostic messages for detected issues.
 
-**Planned capabilities:**
+**Future improvements:**
 
-- Improve Git error detection.
 - Ask for user permission before initializing Git in a directory.
 - Verify additional development tools and configurations.
-- Provide more detailed diagnostic messages and recommendations.
+- Provide more detailed diagnostic recommendations.
 
 ### 2. Project Generator
 
@@ -98,13 +98,13 @@ Inspects existing Python projects and identifies common structural or configurat
 
 ## Current CLI Commands
 
-The initial command-line structure has been established using Python's `argparse` module.
+The command-line structure has been established using Python's `argparse` module.
 
 The following commands are currently registered:
 
 | Command | Purpose | Current Behaviour |
 |---|---|---|
-| `doctor` | Environment Doctor | Checks Python availability and version, and checks Git availability and repository initialization. |
+| `doctor` | Environment Doctor | Checks the active Python version and Git availability and repository status. |
 | `init` | Project Generator | Displays the Project Generator introduction. |
 | `docs` | Documentation Generation | Displays the Documentation Generator introduction. |
 | `inspect` | Project Doctor | Displays the Project Doctor introduction. |
@@ -115,8 +115,8 @@ When DevKit is executed without a subcommand, it displays the general CLI help i
 
 ### Requirements
 
-- Python 3.11 or later is the intended development baseline.
-- Git is used for version control and collaboration.
+- Python 3.11 or later.
+- Git for version control and collaboration.
 
 ### Installation
 
@@ -146,7 +146,7 @@ Display available commands:
 python3 -m devkit.cli --help
 ```
 
-Run an individual command:
+Run the Environment Doctor:
 
 ```bash
 python3 -m devkit.cli doctor
@@ -162,17 +162,19 @@ python3 -m devkit.cli inspect
 
 ## Technology Stack
 
-The project will primarily use:
+The project primarily uses:
 
 - **Python:** Main programming language.
 - **argparse:** Command-line argument and command handling.
+- **sys:** Access to information about the active Python interpreter.
 - **pathlib:** Filesystem and path management.
-- **subprocess:** Interaction with external development tools where necessary.
+- **subprocess:** Interaction with external development tools.
 - **venv:** Python virtual environment management.
 - **unittest:** Automated testing.
+- **unittest.mock:** Mocking dependencies during tests.
 - **Git and GitHub:** Version control and project collaboration.
 
-The initial implementation will prioritize Python's standard library to keep the tool lightweight and minimize external dependencies.
+The implementation prioritizes Python's standard library to keep the tool lightweight and minimize external dependencies.
 
 ## Target Users
 
@@ -186,9 +188,9 @@ DevKit CLI is intended for:
 
 ## Project Scope
 
-The initial release will focus exclusively on Python project workflows.
+The initial release focuses exclusively on Python project workflows.
 
-The first version will prioritize four core features:
+The four core features are:
 
 1. Environment Doctor.
 2. Project Generator.
@@ -199,49 +201,52 @@ Support for other programming languages, advanced templates, and additional deve
 
 ## Development Roadmap
 
-Development will follow an incremental approach:
+Development follows an incremental approach:
 
 | Phase | Focus | Status |
 |---|---|---|
 | 1 | Repository, project structure, and initial documentation | Completed |
 | 2 | CLI foundation, subcommand registration, and command routing | Completed |
-| 3 | Environment Doctor | In Progress |
+| 3 | Environment Doctor | Completed |
 | 4 | Project Generator | Planned |
 | 5 | Documentation Generation | Planned |
 | 6 | Project Doctor | Planned |
-| 7 | Testing, debugging, and refinement | Planned |
+| 7 | Testing, debugging, and refinement | In Progress |
 
 The roadmap may be adjusted as development progresses and feedback is received.
 
 ## Testing Strategy
 
-Testing will be an important part of development.
+Testing is an important part of development.
 
-The project will use Python's `unittest` framework to verify functionality and handle expected edge cases.
+The project uses Python's `unittest` framework to verify functionality and handle expected edge cases.
 
-Planned testing coverage includes:
+**Current automated testing coverage — Environment Doctor:**
 
-- Missing development tools.
-- Unsupported Python versions.
-- Invalid project names.
-- Existing project directories.
-- Filesystem permission errors.
-- Missing project files and directories.
-- Unexpected command failures.
-- Invalid CLI arguments and command behaviour.
+- Python version meets the minimum requirement.
+- Python version is below the minimum requirement.
+- Git repository is detected.
+- Current directory is not a Git repository.
+- Git encounters an unexpected error.
+- Git executable is missing.
 
-**Current testing progress:**
+**Current test results:**
 
-- Manually tested Python version detection.
-- Confirmed the minimum Python version check works.
-- Tested the missing-Python executable scenario.
-- Manually tested Git repository detection.
+- Total automated tests: 6.
+- Passed: 6.
+- Failed: 0.
 
-Automated tests have not yet been implemented.
+Run the test suite using:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+Additional testing coverage will be introduced as other features are implemented.
 
 ## Design Principles
 
-DevKit CLI will follow these principles:
+DevKit CLI follows these principles:
 
 - **Simplicity:** Commands should be easy to understand and use.
 - **Reliability:** Operations should behave predictably.
@@ -252,7 +257,7 @@ DevKit CLI will follow these principles:
 
 ## Project Status
 
-**Current stage:** CLI foundation completed; initial Environment Doctor diagnostics implemented.
+**Current stage:** CLI foundation and Environment Doctor completed.
 
 **Completed:**
 
@@ -266,30 +271,30 @@ DevKit CLI will follow these principles:
 - Successful manual testing of all four commands.
 - Successful display of CLI help using `--help`.
 - Default help behaviour when the CLI is executed without a command.
-- Python availability and version check.
+- Active Python interpreter version detection using `sys.version_info`.
 - Minimum Python version validation (3.11).
-- Exception handling for missing Python executables.
-- Git repository initialization check.
-- Exception handling for missing Git executables.
+- Display of the detected Python version.
+- Git repository detection.
+- Handling of missing Git executables and Git-related errors.
+- Six automated Environment Doctor tests passing.
 
 **Currently in progress:**
 
-- Improving Environment Doctor diagnostics.
-- Implementing interactive Git initialization with user permission.
-- Expanding environment checks.
+- Expanding automated testing.
+- Refining Environment Doctor diagnostics.
+- Improving overall CLI reliability.
 
 **Not yet implemented:**
 
 - Project Generator functionality.
 - Documentation Generation functionality.
 - Project Doctor functionality.
-- Automated test suite.
 
 This README will be updated throughout development to reflect completed features, new commands, usage instructions, testing results, and changes to project scope.
 
 ## Collaboration
 
-Development will use Git and GitHub for version control, collaboration, and code review.
+Development uses Git and GitHub for version control, collaboration, and code review.
 
 Contributions, feedback, and suggestions are welcome, particularly those that improve usability, reliability, and maintainability.
 

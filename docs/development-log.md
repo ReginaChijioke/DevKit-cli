@@ -215,3 +215,64 @@ DevKit will not automatically initialize Git when a directory is not a repositor
 - Implement the interactive Git initialization prompt.
 - Expand Environment Doctor diagnostics.
 - Add automated tests.
+
+## 4 November 2026 — Environment Doctor Implementation
+
+**Time:** 10:48 AM (WAT)
+
+### Milestone: Environment Doctor completed
+
+Implemented and tested the Environment Doctor functionality.
+
+### 1. Python Environment Check
+- Replaced the previous `subprocess.run(["python3", "--version"])` approach with Python's built-in `sys.version_info`.
+- The check now identifies the version of the exact Python interpreter running DevKit.
+- Added a minimum Python version requirement of **Python 3.11**.
+- Used the `major`, `minor`, and `micro` attributes to display the detected Python version.
+- Added clear output indicating whether the active Python interpreter meets the requirement.
+
+### 2. Git Environment Check
+- Implemented Git repository detection using `subprocess.run()`.
+- Added handling for directories that are not Git repositories.
+- Added handling for other Git-related errors.
+- Added `FileNotFoundError` handling for cases where Git is unavailable.
+
+### 3. Unit Testing
+Updated `tests/test_cli.py` to reflect the new implementation.
+
+The test suite now contains six tests covering:
+1. Python version meets the requirement.
+2. Python version is below the requirement.
+3. Git repository is detected.
+4. Directory is not a Git repository.
+5. Git encounters another error.
+6. Git executable is missing.
+
+**Test result:** All 6 tests passed.
+
+Command used:
+
+`python3 -m unittest discover -s tests -v`
+
+### 4. Manual Verification
+
+Executed:
+
+`python3 -m devkit.cli doctor`
+
+Output:
+
+```text
+Python version: 3.12.3
+Python version meets the requirement.
+Git repository detected.
+```
+
+### 5. Key Learning Outcomes
+- Understood the difference between checking a Python executable through `subprocess` and checking the active interpreter through `sys.version_info`.
+- Learned how named tuples expose values through attributes.
+- Practised mocking Python attributes and subprocess calls in unit tests.
+- Improved error handling and diagnostic reporting.
+
+### Status
+**Environment Doctor: Implemented and tested successfully.**

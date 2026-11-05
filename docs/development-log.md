@@ -225,40 +225,47 @@ DevKit will not automatically initialize Git when a directory is not a repositor
 Implemented and tested the Environment Doctor functionality.
 
 ### 1. Python Environment Check
-- Replaced the previous `subprocess.run(["python3", "--version"])` approach with Python's built-in `sys.version_info`.
-- The check now identifies the version of the exact Python interpreter running DevKit.
+
+- Used Python's built-in `sys.version_info` to identify the version of the active Python interpreter.
 - Added a minimum Python version requirement of **Python 3.11**.
 - Used the `major`, `minor`, and `micro` attributes to display the detected Python version.
 - Added clear output indicating whether the active Python interpreter meets the requirement.
 
 ### 2. Git Environment Check
+
 - Implemented Git repository detection using `subprocess.run()`.
 - Added handling for directories that are not Git repositories.
-- Added handling for other Git-related errors.
-- Added `FileNotFoundError` handling for cases where Git is unavailable.
+- Added handling for missing Git executables through `FileNotFoundError`.
 
 ### 3. Unit Testing
-Updated `tests/test_cli.py` to reflect the new implementation.
 
-The test suite now contains six tests covering:
-1. Python version meets the requirement.
-2. Python version is below the requirement.
-3. Git repository is detected.
-4. Directory is not a Git repository.
-5. Git encounters another error.
-6. Git executable is missing.
+Updated `tests/test_cli.py` to cover Python and Git environment checks.
 
-**Test result:** All 6 tests passed.
+The test suite now contains **seven tests**:
+
+1. `test_python_version_meets_requirement`
+2. `test_python_version_below_requirement`
+3. `test_python_command_fails`
+4. `test_python_executable_missing`
+5. `test_git_repository_detected`
+6. `test_directory_is_not_git_repository`
+7. `test_git_executable_missing`
+
+**Test result:** All 7 tests passed.
 
 Command used:
 
-`python3 -m unittest discover -s tests -v`
+```bash
+python3 -m unittest discover -s tests -v
+```
 
 ### 4. Manual Verification
 
 Executed:
 
-`python3 -m devkit.cli doctor`
+```bash
+python3 -m devkit.cli doctor
+```
 
 Output:
 
@@ -269,10 +276,12 @@ Git repository detected.
 ```
 
 ### 5. Key Learning Outcomes
+
 - Understood the difference between checking a Python executable through `subprocess` and checking the active interpreter through `sys.version_info`.
 - Learned how named tuples expose values through attributes.
 - Practised mocking Python attributes and subprocess calls in unit tests.
 - Improved error handling and diagnostic reporting.
 
 ### Status
+
 **Environment Doctor: Implemented and tested successfully.**

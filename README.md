@@ -223,18 +223,19 @@ The project uses Python's `unittest` framework to verify functionality and handl
 
 **Current automated testing coverage — Environment Doctor:**
 
-- Python version meets the minimum requirement.
-- Python version is below the minimum requirement.
-- Git repository is detected.
-- Current directory is not a Git repository.
-- Git encounters an unexpected error.
-- Git executable is missing.
+1. Python version meets the minimum requirement.
+2. Python version is exactly at the minimum requirement (Python 3.11).
+3. Python version is below the minimum requirement.
+4. Git repository is detected.
+5. Current directory is not a Git repository.
+6. Git encounters an unexpected error.
+7. Git executable is missing.
 
 **Current test results:**
 
-- Total automated tests: 6.
-- Passed: 6.
-- Failed: 0.
+- Total automated tests: **7**.
+- Passed: **7**.
+- Failed: **0**.
 
 Run the test suite using:
 
@@ -276,7 +277,7 @@ DevKit CLI follows these principles:
 - Display of the detected Python version.
 - Git repository detection.
 - Handling of missing Git executables and Git-related errors.
-- Six automated Environment Doctor tests passing.
+- **Seven automated Environment Doctor tests passing.**
 
 **Currently in progress:**
 

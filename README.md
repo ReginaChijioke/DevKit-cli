@@ -34,7 +34,7 @@ The primary objectives of DevKit CLI are to:
 
 - Automate repetitive Python project setup tasks.
 - Simplify development environment verification.
-- Generate standardized Python project structures.
+- Generate customizable Python project structures.
 - Reduce the effort required to create project documentation.
 - Help developers identify common project configuration and structural issues.
 - Encourage consistency and better development practices.
@@ -65,14 +65,29 @@ Checks the developer's active Python environment and verifies Git availability a
 
 ### 2. Project Generator
 
-Automates the creation of standardized Python project structures.
+Automates the creation of Python project directories and user-selected folders.
+
+**Implemented capabilities:**
+
+- Accept a project name through the `init` command.
+- Validate project names.
+- Reject invalid project names and characters.
+- Check whether a project directory already exists.
+- Create a new project directory.
+- Interactively collect folder names from the user.
+- Process comma-separated folder names.
+- Remove unnecessary whitespace from folder names.
+- Ignore empty folder entries.
+- Create the requested directories inside the project directory.
 
 **Planned capabilities:**
 
-- Generate a predefined Python project directory structure.
-- Create essential starter files.
-- Provide a consistent starting point for new projects.
-- Help reduce repetitive manual setup.
+- Allow users to specify files grouped by their destination folders.
+- Create empty files in the locations selected by the user.
+- Improve input validation and filesystem error handling.
+- Add automated tests for Project Generator functionality.
+
+DevKit's Project Generator is being designed around user-customizable project structures rather than forcing every developer to use one predefined template.
 
 ### 3. Documentation Generation
 
@@ -98,14 +113,12 @@ Inspects existing Python projects and identifies common structural or configurat
 
 ## Current CLI Commands
 
-The command-line structure has been established using Python's `argparse` module.
-
-The following commands are currently registered:
+The command-line structure is established using Python's `argparse` module.
 
 | Command | Purpose | Current Behaviour |
 |---|---|---|
 | `doctor` | Environment Doctor | Checks the active Python version and Git availability and repository status. |
-| `init` | Project Generator | Displays the Project Generator introduction. |
+| `init` | Project Generator | Validates the project name, creates the project directory, and interactively creates user-selected folders. |
 | `docs` | Documentation Generation | Displays the Documentation Generator introduction. |
 | `inspect` | Project Doctor | Displays the Project Doctor introduction. |
 
@@ -152,10 +165,27 @@ Run the Environment Doctor:
 python3 -m devkit.cli doctor
 ```
 
-Other available commands:
+Start a new project:
 
 ```bash
-python3 -m devkit.cli init
+python3 -m devkit.cli init weather_app
+```
+
+DevKit validates the project name, checks whether the project already exists, and creates the project directory.
+
+It then prompts the user to enter the folder names they want created.
+
+Example:
+
+```text
+Enter folder names: src, tests, config
+```
+
+DevKit creates the requested folders inside the new project directory.
+
+Run the other available commands:
+
+```bash
 python3 -m devkit.cli docs
 python3 -m devkit.cli inspect
 ```
@@ -208,7 +238,7 @@ Development follows an incremental approach:
 | 1 | Repository, project structure, and initial documentation | Completed |
 | 2 | CLI foundation, subcommand registration, and command routing | Completed |
 | 3 | Environment Doctor | Completed |
-| 4 | Project Generator | Planned |
+| 4 | Project Generator | In Progress |
 | 5 | Documentation Generation | Planned |
 | 6 | Project Doctor | Planned |
 | 7 | Testing, debugging, and refinement | In Progress |
@@ -223,17 +253,18 @@ The project uses Python's `unittest` framework to verify functionality and handl
 
 **Current automated testing coverage — Environment Doctor:**
 
-- Python version meets the minimum requirement.
-- Python version is below the minimum requirement.
-- Git repository is detected.
-- Current directory is not a Git repository.
-- Git encounters an unexpected error.
-- Git executable is missing.
+1. Python version meets the minimum requirement.
+2. Python version is below the minimum requirement.
+3. Python version is exactly at the minimum requirement (Python 3.11).
+4. Git repository is detected.
+5. Current directory is not a Git repository.
+6. Git encounters an unexpected error.
+7. Git executable is missing.
 
 **Current test results:**
 
-- Total automated tests: 6.
-- Passed: 6.
+- Total automated tests: 7.
+- Passed: 7.
 - Failed: 0.
 
 Run the test suite using:
@@ -242,7 +273,14 @@ Run the test suite using:
 python3 -m unittest discover -s tests -v
 ```
 
-Additional testing coverage will be introduced as other features are implemented.
+Project Generator manual testing currently covers:
+
+- Successful project directory creation.
+- Rejection of an existing project directory.
+- Rejection of invalid project names.
+- Creation of multiple user-selected folders.
+
+Automated testing for the Project Generator will be introduced as the feature develops.
 
 ## Design Principles
 
@@ -254,10 +292,11 @@ DevKit CLI follows these principles:
 - **Clarity:** Errors and diagnostic messages should be understandable.
 - **Modularity:** Features should be organized into maintainable components.
 - **Testability:** Functionality should be verifiable through automated tests.
+- **Flexibility:** Developers should have control over their generated project structures.
 
 ## Project Status
 
-**Current stage:** CLI foundation and Environment Doctor completed.
+**Current stage:** CLI foundation and Environment Doctor completed; Project Generator in progress.
 
 **Completed:**
 
@@ -276,17 +315,21 @@ DevKit CLI follows these principles:
 - Display of the detected Python version.
 - Git repository detection.
 - Handling of missing Git executables and Git-related errors.
-- Six automated Environment Doctor tests passing.
+- Seven automated Environment Doctor tests passing.
+- Project name validation for the Project Generator.
+- Existing project directory detection.
+- Project directory creation using `pathlib`.
+- Interactive collection and creation of user-selected folders.
 
 **Currently in progress:**
 
-- Expanding automated testing.
-- Refining Environment Doctor diagnostics.
-- Improving overall CLI reliability.
+- Customizable Project Generator functionality.
+- Grouped file input and file placement.
+- Automated Project Generator testing.
+- Refining filesystem error handling.
 
 **Not yet implemented:**
 
-- Project Generator functionality.
 - Documentation Generation functionality.
 - Project Doctor functionality.
 

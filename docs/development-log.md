@@ -276,3 +276,59 @@ Git repository detected.
 
 ### Status
 **Environment Doctor: Implemented and tested successfully.**
+
+# DevKit CLI — Development Log
+
+## 6 November 2026 — Project Generator Implementation
+
+**Time:** 1:43 PM WAT
+
+### Milestone: Initial Project Generator Implementation
+
+Implemented the initial Project Generator functionality for DevKit CLI.
+
+### Features Implemented
+
+- Added project name validation.
+- Ensured project names start with a letter.
+- Restricted project names to alphanumeric characters and underscores.
+- Added a check to prevent creating a project in an existing path.
+- Implemented project directory creation using `pathlib`.
+- Added interactive input for users to specify their preferred folder structure.
+- Used `split(",")` to separate comma-separated folder names.
+- Used `strip()` to remove unnecessary whitespace.
+- Skipped empty folder names.
+- Created the requested folders inside the project directory.
+
+### Manual Testing
+
+1. Successfully created a project using `python3 -m devkit.cli init weather_app`.
+2. Attempted to create the same project again and confirmed that the existing-project check works.
+3. Tested an invalid project name (`weather-app`) and confirmed that validation rejects it.
+
+### Concepts Practised
+
+- `pathlib.Path`
+- `.exists()` and `.mkdir()`
+- `input()` and `.split()`
+- `.strip()`
+- List creation and `.append()`
+- Conditional validation
+- Iterating through lists with `for` loops
+- Returning early when validation fails
+
+### Design Decisions
+
+- Users can customize their project folder structure instead of being restricted to a predefined template.
+- Project creation uses interactive terminal input.
+- DevKit will create empty files only; users remain responsible for writing their own code and file contents.
+
+### Current Status
+
+The initial project directory and folder generation functionality is implemented.
+
+### Next Steps
+
+- Implement grouped file input so users can specify which files belong in each folder.
+- Create empty files in the requested locations.
+- Add automated tests for the Project Generator.

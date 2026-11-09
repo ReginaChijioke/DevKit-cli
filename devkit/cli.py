@@ -81,15 +81,7 @@ def run_init(parsed_argument):
         if separator == "":
             print("Invalid folder/file format.")
             continue
-        
-        split_files = files.split(",")
-        cleaned_file_names = []
-        for each_file in split_files:
-            stripped_file = each_file.strip()
-            if stripped_file != "":
-                cleaned_file_names.append(stripped_file)
-            if cleaned_folder == project_path:
-                destination_path == project_path / cleaned_folder
+
         cleaned_folder = folder.strip()
         if cleaned_folder == "root":
             destination_path = project_path
@@ -98,14 +90,24 @@ def run_init(parsed_argument):
             continue
         else:
             destination_path = project_path / cleaned_folder 
-    cleaned_file_names = []
-    for file_name in file_names:
-        cleaned_file_name = file_name.strip()
-        if cleaned_file_name:
-            cleaned_file_names.append(cleaned_file_name)
-    for file in cleaned_file_names:
-        file_path = folder_path / file
-        file_path.touch()
+        split_files = files.split(",")
+        cleaned_file_names = []
+        for each_file in split_files:
+            stripped_file = each_file.strip()
+            if stripped_file == "":
+                continue
+            file_name = Path(stripped_file).name
+            if stripped_file != file_name:
+                print("Invalid filename")
+                continue
+            if file_name == "" or file_name == "." or file_name == "..":
+                print("Invalid filename")
+                continue
+            cleaned_file_names.append(file_name)
+        for file in cleaned_file_names:
+            create_path = destination_path / file
+            create_path.touch()
+
     print("Project created successfully.")
 register_init.set_defaults(func=run_init)
 

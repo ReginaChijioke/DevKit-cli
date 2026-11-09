@@ -69,7 +69,35 @@ def run_init(parsed_argument):
     for name in cleaned_names:
         folder_path = project_path / name
         folder_path.mkdir()
-    file_names = input("Enter file names: ").split(",")
+    grouped_file_entries = []
+    while True:
+        folder_file_mapping = input("Enter folder/file mapping: ")
+        if folder_file_mapping == "":
+            break
+        else:
+            grouped_file_entries.append(folder_file_mapping)
+    for entry in grouped_file_entries:
+        folder, separator, files = entry.partition(":")
+        if separator == "":
+            print("Invalid folder/file format.")
+            continue
+        
+        split_files = files.split(",")
+        cleaned_file_names = []
+        for each_file in split_files:
+            stripped_file = each_file.strip()
+            if stripped_file != "":
+                cleaned_file_names.append(stripped_file)
+            if cleaned_folder == project_path:
+                destination_path == project_path / cleaned_folder
+        cleaned_folder = folder.strip()
+        if cleaned_folder == "root":
+            destination_path = project_path
+        elif cleaned_folder not in cleaned_names:
+            print("Folder does not exist")
+            continue
+        else:
+            destination_path = project_path / cleaned_folder 
     cleaned_file_names = []
     for file_name in file_names:
         cleaned_file_name = file_name.strip()

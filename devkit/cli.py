@@ -64,8 +64,28 @@ def run_init(parsed_argument):
     cleaned_names = []
     for name in folder_names:
         cleaned_name = name.strip()
-        if cleaned_name:
-            cleaned_names.append(cleaned_name)
+        if not cleaned_name:
+            continue
+        if cleaned_name == "." or cleaned_name == "..":
+            print("Invalid folder name.")
+            continue
+        if not cleaned_name[0].isalpha():
+            print("Invalid folder name.")
+            continue
+        folder_valid = True 
+        for char in cleaned_name:
+            if not char.isalnum() and char != "_" and char != "-":
+                folder_valid = False
+                break
+        if folder_valid is False:
+            print("Invalid folder name.")
+            continue
+        if cleaned_name in cleaned_names:
+            print("Duplicate folder name.")
+            continue
+        else:
+            cleaned_names.append(cleaned_name) 
+
     for name in cleaned_names:
         folder_path = project_path / name
         folder_path.mkdir()

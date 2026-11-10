@@ -231,6 +231,40 @@ class TestProjectGenerator(unittest.TestCase):
 
         self.assertIn("Invalid folder/file format.", output)
 
+    def test_invalid_folder_names_are_rejected(self):
+        output = self.run_init_and_capture_output(
+            "folder_validation_test",
+            [
+                "src, test_files, my-project, 123folder, src/main, my folder, ..",
+                ""
+            ]
+        )
+
+        self.assertTrue(Path("folder_validation_test/src").is_dir())
+        self.assertTrue(Path("folder_validation_test/test_files").is_dir())
+        self.assertTrue(Path("folder_validation_test/my-project").is_dir())
+
+        self.assertFalse(Path("folder_validation_test/123folder").exists())
+        self.assertFalse(Path("folder_validation_test/my folder").exists())
+        self.assertFalse(Path("folder_validation_test/src/main").exists())
+
+        self.assertEqual(output.count("Invalid folder name."), 4)
+
+    def test_duplicate_folder_names_are_rejected(self):
+        output = self.run_init_and_capture_output(
+            "duplicate_folder_test",
+            [
+                "src, tests, src, docs, tests",
+                ""
+            ]
+        )
+
+        self.assertTrue(Path("duplicate_folder_test/src").is_dir())
+        self.assertTrue(Path("duplicate_folder_test/tests").is_dir())
+        self.assertTrue(Path("duplicate_folder_test/docs").is_dir())
+
+        self.assertEqual(output.count("Duplicate folder name."), 2)
+
 
 if __name__ == "__main__":
     unittest.main()

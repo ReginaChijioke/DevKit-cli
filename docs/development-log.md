@@ -332,3 +332,189 @@ The initial project directory and folder generation functionality is implemented
 - Implement grouped file input so users can specify which files belong in each folder.
 - Create empty files in the requested locations.
 - Add automated tests for the Project Generator.
+
+## 10 November 2026 — Project Generator Enhancement and Validation
+
+**Time:** 2:05 PM WAT
+
+### Milestone: Customizable Project Structure, File Mapping, and Input Validation
+
+Continued development of the Project Generator by extending its initial folder-generation functionality to support grouped file creation and stronger input validation.
+
+### 1. Features Implemented
+
+**A. Grouped File Input and File Creation**
+
+- Implemented interactive input for specifying which files belong in each folder.
+- Introduced a folder-to-file mapping format using a colon (`:`).
+- Used `partition(":")` to separate the destination folder from its associated filenames.
+- Supported comma-separated filenames within each mapping.
+- Used `strip()` to remove unnecessary whitespace from folder names and filenames.
+- Added support for `root` as a special destination representing the project root directory.
+- Allowed users to create files directly in the project root or inside previously created folders.
+- Used `pathlib` path joining to construct file destinations.
+- Used `.touch()` to create empty files.
+
+**B. Folder Mapping Validation**
+
+- Added validation to ensure that each mapping contains the expected colon separator.
+- Rejected mappings that reference folders that were not created.
+- Prevented invalid mappings from interrupting the remaining file-generation process.
+
+**C. Filename Validation**
+
+- Added filename validation to prevent users from specifying nested paths instead of individual filenames.
+- Used `Path().name` to compare the supplied filename with its final path component.
+- Rejected empty filenames, `.` and `..`.
+- Allowed simple filenames, including dotfiles such as `.gitignore`.
+- Ensured invalid filenames are skipped rather than passed to file creation.
+
+**D. Folder-Name Validation**
+
+- Required folder names to begin with an alphabetic character.
+- Restricted folder names to alphanumeric characters, underscores, and hyphens.
+- Rejected directory traversal entries such as `.` and `..`.
+- Rejected folder names containing path separators or spaces.
+- Ensured invalid folder names are not added to the list of accepted folder names.
+
+**E. Duplicate Folder Detection**
+
+- Added a check to determine whether a folder name already exists in the accepted folder-name list.
+- Rejected duplicate folder names before directory creation.
+- Prevented repeated folder creation from causing `FileExistsError`.
+
+### 2. Design Decisions
+
+The following decisions were established during this implementation milestone:
+
+**Customizable Project Structures**
+
+- Users should be able to define their own project folder structures rather than being restricted to predefined templates.
+- Folder creation should remain interactive, allowing users to specify multiple folders in one input.
+
+**Grouped File Mapping**
+
+- Files should be specified according to their destination folders rather than collected as one unstructured list.
+- The colon (`:`) separates a destination folder from its associated filenames.
+- Commas separate multiple filenames within the same destination.
+- The special destination `root` represents the project directory itself.
+
+**Empty File Creation**
+
+- DevKit should create empty files rather than populate them with starter code or predefined content.
+- Developers retain control over the contents of their generated files.
+
+**Input Validation and Safety**
+
+- Folder and filename inputs must be validated before filesystem operations are performed.
+- Invalid entries should be rejected without terminating the entire project-generation process.
+- Duplicate folder names should be detected before attempting directory creation.
+- File mappings should only target the project root or folders that were successfully created.
+
+**Incremental Error Handling**
+
+- Invalid folder names, filenames, and mappings should produce understandable messages.
+- Where possible, an invalid entry should be skipped while allowing the generator to process subsequent valid entries.
+
+### 3. Example of the Project Generator Input Format
+
+```text
+python3 -m devkit.cli init weather_app
+
+Enter folder names: src, tests, config
+
+Enter folder/file mapping:
+src: main.py, config.py
+tests: test_main.py
+root: README.md, .gitignore
+```
+
+This approach allows users to define both their folder structure and the placement of empty files during project initialization.
+
+### 4. Manual Testing
+
+The following behaviours were manually tested:
+
+1. Successfully created projects with multiple user-selected folders.
+2. Successfully created empty files inside specified folders.
+3. Successfully created empty files directly in the project root using `root`.
+4. Rejected filenames containing nested paths, such as `src/main.py`.
+5. Rejected parent-directory references such as `..`.
+6. Rejected invalid folder names, including names beginning with numbers, names containing spaces, and path-based entries.
+7. Confirmed that valid folder names containing underscores and hyphens are accepted.
+8. Confirmed that duplicate folder names are rejected without causing a filesystem error.
+9. Confirmed that invalid folder entries do not prevent valid folders from being created.
+
+### 5. Automated Testing
+
+Expanded the Project Generator test coverage by adding tests for folder validation and duplicate folder detection.
+
+**Environment Doctor:**
+- Seven automated tests.
+
+**Project Generator:**
+- Successful project and file creation.
+- Invalid project-name rejection.
+- Existing-project detection.
+- Invalid filename-path rejection.
+- Parent-directory filename rejection.
+- Invalid folder mapping rejection.
+- Invalid mapping format rejection.
+- Invalid folder-name rejection.
+- Duplicate folder-name rejection.
+
+**Test execution:**
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+**Results:**
+- Total tests: 16
+- Passed: 16
+- Failed: 0
+
+All 16 automated tests passed successfully.
+
+### 6. Concepts Practised
+
+- `pathlib.Path`
+- `.exists()`, `.mkdir()`, and `.touch()`
+- `Path.name` and path joining
+- `str.partition()`
+- `.split()` and `.strip()`
+- String validation using `.isalpha()` and `.isalnum()`
+- Character-by-character validation
+- Boolean flags for validation
+- `break` and `continue`
+- Membership testing with `in`
+- List creation and `.append()`
+- Nested loops and conditional logic
+- Filesystem safety and input validation
+- Automated testing with `unittest`
+- Temporary directories with `tempfile`
+- Mocking interactive input with `unittest.mock`
+
+### 7. Current Status
+
+The Project Generator now supports:
+
+- Project directory creation.
+- Custom folder creation.
+- Folder-name validation.
+- Duplicate folder detection.
+- Grouped folder-to-file mappings.
+- Project-root file placement.
+- Empty file creation.
+- Filename and mapping validation.
+- Automated tests covering its current functionality.
+
+The Project Generator remains in progress while additional refinement, filesystem error handling, and review are considered.
+
+### 8. Next Steps
+
+- Review the complete Project Generator implementation for edge cases.
+- Identify and handle any remaining filesystem errors.
+- Review the automated tests for completeness.
+- Update the development documentation as further improvements are made.
+- Complete the Project Generator milestone before moving to Documentation Generation.

@@ -65,29 +65,49 @@ Checks the developer's active Python environment and verifies Git availability a
 
 ### 2. Project Generator
 
-Automates the creation of Python project directories and user-selected folders.
+Automates the creation of customizable project directories, folders, and empty files.
 
 **Implemented capabilities:**
 
 - Accept a project name through the `init` command.
-- Validate project names.
-- Reject invalid project names and characters.
+- Validate project names and reject invalid characters.
 - Check whether a project directory already exists.
 - Create a new project directory.
-- Interactively collect folder names from the user.
-- Process comma-separated folder names.
+- Interactively collect comma-separated folder names.
 - Remove unnecessary whitespace from folder names.
 - Ignore empty folder entries.
-- Create the requested directories inside the project directory.
+- Require folder names to begin with a letter.
+- Allow alphanumeric characters, underscores, and hyphens in folder names.
+- Reject invalid folder names, including path-based entries and directory traversal names such as `.` and `..`.
+- Detect and reject duplicate folder names.
+- Create the requested folders inside the project directory.
+- Accept grouped folder/file mappings.
+- Support `root` as the destination for files placed directly in the project root.
+- Validate folder mappings and reject references to folders that were not created.
+- Accept comma-separated filenames within a mapping.
+- Reject invalid filenames and nested file paths.
+- Create empty files in the selected destinations using `pathlib`.
 
-**Planned capabilities:**
+**Current input format:**
 
-- Allow users to specify files grouped by their destination folders.
-- Create empty files in the locations selected by the user.
-- Improve input validation and filesystem error handling.
-- Add automated tests for Project Generator functionality.
+```text
+Enter folder names: src, tests, config
 
-DevKit's Project Generator is being designed around user-customizable project structures rather than forcing every developer to use one predefined template.
+Enter folder/file mapping:
+src: main.py, config.py
+tests: test_main.py
+root: README.md, .gitignore
+```
+
+In this example, DevKit creates the requested folders and empty files, with `root` representing the project directory itself.
+
+**Future improvements:**
+
+- Improve filesystem error handling.
+- Refine input validation and user feedback.
+- Consider additional project templates and configuration options.
+
+DevKit's Project Generator is designed around user-customizable project structures rather than forcing every developer to use one predefined template.
 
 ### 3. Documentation Generation
 
@@ -118,7 +138,7 @@ The command-line structure is established using Python's `argparse` module.
 | Command | Purpose | Current Behaviour |
 |---|---|---|
 | `doctor` | Environment Doctor | Checks the active Python version and Git availability and repository status. |
-| `init` | Project Generator | Validates the project name, creates the project directory, and interactively creates user-selected folders. |
+| `init` | Project Generator | Creates a project directory, validates and creates user-selected folders, and creates empty files through grouped mappings. |
 | `docs` | Documentation Generation | Displays the Documentation Generator introduction. |
 | `inspect` | Project Doctor | Displays the Project Doctor introduction. |
 
@@ -179,9 +199,16 @@ Example:
 
 ```text
 Enter folder names: src, tests, config
+
+Enter folder/file mapping:
+src: main.py, config.py
+tests: test_main.py
+root: README.md, .gitignore
 ```
 
-DevKit creates the requested folders inside the new project directory.
+DevKit validates the folder names, rejects duplicates and invalid entries, and creates the accepted folders.
+
+It then processes the grouped file mappings and creates empty files in the specified destinations.
 
 Run the other available commands:
 
@@ -202,6 +229,7 @@ The project primarily uses:
 - **venv:** Python virtual environment management.
 - **unittest:** Automated testing.
 - **unittest.mock:** Mocking dependencies during tests.
+- **tempfile:** Isolated temporary directories for testing.
 - **Git and GitHub:** Version control and project collaboration.
 
 The implementation prioritizes Python's standard library to keep the tool lightweight and minimize external dependencies.
@@ -251,7 +279,7 @@ Testing is an important part of development.
 
 The project uses Python's `unittest` framework to verify functionality and handle expected edge cases.
 
-**Current automated testing coverage — Environment Doctor:**
+**Environment Doctor automated tests:**
 
 1. Python version meets the minimum requirement.
 2. Python version is below the minimum requirement.
@@ -261,10 +289,22 @@ The project uses Python's `unittest` framework to verify functionality and handl
 6. Git encounters an unexpected error.
 7. Git executable is missing.
 
+**Project Generator automated tests:**
+
+1. Project directory, folders, and files are created successfully.
+2. Invalid project names are rejected.
+3. Existing project directories are rejected.
+4. Invalid filename paths are rejected.
+5. Parent directory filenames are rejected.
+6. Mappings to nonexistent folders are rejected.
+7. Invalid mapping formats are rejected.
+8. Invalid folder names are rejected.
+9. Duplicate folder names are rejected.
+
 **Current test results:**
 
-- Total automated tests: 7.
-- Passed: 7.
+- Total automated tests: 16.
+- Passed: 16.
 - Failed: 0.
 
 Run the test suite using:
@@ -273,14 +313,7 @@ Run the test suite using:
 python3 -m unittest discover -s tests -v
 ```
 
-Project Generator manual testing currently covers:
-
-- Successful project directory creation.
-- Rejection of an existing project directory.
-- Rejection of invalid project names.
-- Creation of multiple user-selected folders.
-
-Automated testing for the Project Generator will be introduced as the feature develops.
+The tests use temporary directories to isolate filesystem operations and avoid leaving generated test projects in the repository.
 
 ## Design Principles
 
@@ -296,7 +329,7 @@ DevKit CLI follows these principles:
 
 ## Project Status
 
-**Current stage:** CLI foundation and Environment Doctor completed; Project Generator in progress.
+**Current stage:** CLI foundation and Environment Doctor completed; Project Generator implementation and testing in progress.
 
 **Completed:**
 
@@ -320,13 +353,19 @@ DevKit CLI follows these principles:
 - Existing project directory detection.
 - Project directory creation using `pathlib`.
 - Interactive collection and creation of user-selected folders.
+- Folder-name validation and rejection of invalid path entries.
+- Duplicate folder-name detection.
+- Grouped folder/file mapping.
+- Support for placing files in selected folders or the project root.
+- Filename validation and rejection of nested paths.
+- Empty file creation.
+- Sixteen automated tests passing across Environment Doctor and Project Generator.
 
 **Currently in progress:**
 
-- Customizable Project Generator functionality.
-- Grouped file input and file placement.
-- Automated Project Generator testing.
-- Refining filesystem error handling.
+- Final refinement of Project Generator functionality.
+- Additional filesystem error handling.
+- Further validation and edge-case testing.
 
 **Not yet implemented:**
 

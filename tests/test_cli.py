@@ -64,7 +64,9 @@ class TestEnvironmentDoctor(unittest.TestCase):
 
     @patch("devkit.cli.subprocess.run")
     def test_python_version_below_requirement(self, mock_run):
-        mock_run.return_value = self.create_result()
+        mock_run.return_value = self.create_result(
+            returncode=0
+        )
 
         test_version = Mock()
         test_version.major = 3
@@ -156,7 +158,136 @@ class TestProjectGenerator(unittest.TestCase):
         self.assertTrue(Path("sample_project/src/main.py").is_file())
         self.assertTrue(Path("sample_project/src/config.py").is_file())
         self.assertTrue(Path("sample_project/README.md").is_file())
-        self.assertIn("Project created successfully.", output)
+        self.assertIn("3 created successfully.", output)
+        self.assertIn("0 failed to create.", output)
+
+    def test_project_directory_permission_error(self):
+        with patch.object(Path, "mkdir", side_effect=PermissionError):
+            output = self.run_init_and_capture_output(
+                "permission_test",
+                []
+            )
+
+        self.assertIn(
+            "Permission denied: unable to create project directory.",
+            output
+        )
+        self.assertFalse(Path("permission_test").exists())
+
+    def test_project_directory_oserror(self):
+        error_message = "Simulated filesystem failure"
+
+        with patch.object(
+            Path,
+            "mkdir",
+            side_effect=OSError(error_message)
+        ):
+            output = self.run_init_and_capture_output(
+                "filesystem_error_test",
+                []
+            )
+
+        self.assertIn(
+            f"Could not create project directory: {error_message}",
+            output
+        )
+        self.assertFalse(Path("filesystem_error_test").exists())
+
+    def test_folder_creation_oserror(self):
+        original_mkdir = Path.mkdir
+
+        def selective_mkdir(path, *args, **kwargs):
+            if path.name == "tests":
+                raise OSError("Simulated folder creation failure")
+            return original_mkdir(path, *args, **kwargs)
+
+        with patch.object(Path, "mkdir", new=selective_mkdir):
+            output = self.run_init_and_capture_output(
+                "folder_error_test",
+                [
+                    "src, tests, docs",
+                    ""
+                ]
+            )
+
+        self.assertTrue(Path("folder_error_test/src").is_dir())
+        self.assertFalse(Path("folder_error_test/tests").exists())
+        self.assertTrue(Path("folder_error_test/docs").is_dir())
+
+        self.assertIn("Could not create tests:", output)
+        self.assertIn("Simulated folder creation failure", output)
+        self.assertIn("2 created successfully.", output)
+        self.assertIn("1 failed to create.", output)
+
+    def test_file_creation_oserror(self):
+        original_touch = Path.touch
+
+        def selective_touch(path, *args, **kwargs):
+            if path.name == "main.py":
+                raise OSError("Simulated file creation failure")
+            return original_touch(path, *args, **kwargs)
+
+        with patch.object(Path, "touch", new=selective_touch):
+            output = self.run_init_and_capture_output(
+                "file_error_test",
+                [
+                    "src",
+                    "src: main.py, config.py",
+                    ""
+                ]
+            )
+
+        self.assertFalse(
+            Path("file_error_test/src/main.py").exists()
+        )
+        self.assertTrue(
+            Path("file_error_test/src/config.py").is_file()
+        )
+
+        self.assertIn("Could not create main.py:", output)
+        self.assertIn("Simulated file creation failure", output)
+        self.assertIn("1 created successfully.", output)
+        self.assertIn("1 failed to create.", output)
+
+    def test_existing_file_is_preserved(self):
+        output = StringIO()
+        input_count = 0
+
+        def provide_input(prompt):
+            nonlocal input_count
+            input_count += 1
+
+            if input_count == 2:
+                existing_file = Path(
+                    "existing_file_test/src/main.py"
+                )
+                existing_file.write_text("Original content")
+
+            user_inputs = [
+                "src",
+                "src: main.py, config.py",
+                ""
+            ]
+
+            return user_inputs[input_count - 1]
+
+        with patch("builtins.input", side_effect=provide_input):
+            with redirect_stdout(output):
+                run_init(
+                    Namespace(project_name="existing_file_test")
+                )
+
+        self.assertEqual(
+            Path("existing_file_test/src/main.py").read_text(),
+            "Original content"
+        )
+        self.assertTrue(
+            Path("existing_file_test/src/config.py").is_file()
+        )
+
+        self.assertIn("File already exists.", output.getvalue())
+        self.assertIn("1 created successfully.", output.getvalue())
+        self.assertIn("0 failed to create.", output.getvalue())
 
     def test_invalid_project_name_is_rejected(self):
         output = self.run_init_and_capture_output(
@@ -264,6 +395,28 @@ class TestProjectGenerator(unittest.TestCase):
         self.assertTrue(Path("duplicate_folder_test/docs").is_dir())
 
         self.assertEqual(output.count("Duplicate folder name."), 2)
+
+    def test_duplicate_filenames_are_rejected(self):
+        output = self.run_init_and_capture_output(
+            "duplicate_file_test",
+            [
+                "src",
+                "src: main.py, main.py",
+                ""
+            ]
+        )
+
+        self.assertTrue(
+            Path("duplicate_file_test/src/main.py").is_file()
+        )
+        self.assertEqual(
+            len(list(Path("duplicate_file_test/src").iterdir())),
+            1
+        )
+
+        self.assertIn("Duplicate filename.", output)
+        self.assertIn("1 created successfully.", output)
+        self.assertIn("0 failed to create.", output)
 
 
 if __name__ == "__main__":

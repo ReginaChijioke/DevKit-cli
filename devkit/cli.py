@@ -45,6 +45,9 @@ register_doctor.set_defaults(func=run_doctor)
 
 def run_init(parsed_argument):
     project_name = parsed_argument.project_name
+    if not project_name:
+        print("Project name cannot be empty.")
+        return
     if not project_name[0].isalpha():
         print("Project name must start with a letter.")
         return 
@@ -55,11 +58,18 @@ def run_init(parsed_argument):
             return
     print(f"Creating: {project_name}")
 
-    project_path = Path(project_name)
-    if project_path.exists():
-        print("Project already exists.")
+    try:
+        project_path = Path(project_name)
+        if project_path.exists():
+            print("Project already exists.")
+            return
+        project_path.mkdir()
+    except PermissionError:
+        print("Permission denied: unable to create project directory.")
+        return 
+    except OSError as error:
+        print(f"Could not create project directory: {error}")
         return
-    project_path.mkdir()
     folder_names = input("Enter folder names: ").split(",")
     cleaned_names = []
     for name in folder_names:
@@ -85,10 +95,16 @@ def run_init(parsed_argument):
             continue
         else:
             cleaned_names.append(cleaned_name) 
-
+    successful_folders = 0
+    failed_folders = 0
     for name in cleaned_names:
-        folder_path = project_path / name
-        folder_path.mkdir()
+        try:
+            folder_path = project_path / name
+            folder_path.mkdir()
+            successful_folders += 1
+        except OSError as error:
+            failed_folders += 1
+            print(f"Could not create {name}: {error}")
     grouped_file_entries = []
     while True:
         folder_file_mapping = input("Enter folder/file mapping: ")
@@ -96,6 +112,8 @@ def run_init(parsed_argument):
             break
         else:
             grouped_file_entries.append(folder_file_mapping)
+    successful_files = 0
+    failed_files = 0
     for entry in grouped_file_entries:
         folder, separator, files = entry.partition(":")
         if separator == "":
@@ -110,6 +128,9 @@ def run_init(parsed_argument):
             continue
         else:
             destination_path = project_path / cleaned_folder 
+            if not destination_path.is_dir():
+                print("Folder path does not exist.")
+                continue
         split_files = files.split(",")
         cleaned_file_names = []
         for each_file in split_files:
@@ -123,12 +144,27 @@ def run_init(parsed_argument):
             if file_name == "" or file_name == "." or file_name == "..":
                 print("Invalid filename")
                 continue
+            if file_name in cleaned_file_names:
+                print("Duplicate filename.")
+                continue
             cleaned_file_names.append(file_name)
         for file in cleaned_file_names:
             create_path = destination_path / file
-            create_path.touch()
-
-    print("Project created successfully.")
+            if create_path.exists():
+                print("File already exists.")
+                continue
+            try: 
+                create_path.touch()
+                successful_files += 1
+            except OSError as error:
+                failed_files += 1
+                print(f"Could not create {file}:{error} ")
+    print("Folders:")
+    print(f"{successful_folders} created successfully.")
+    print(f"{failed_folders} failed to create.")
+    print("Files:")
+    print(f"{successful_files} created successfully.")
+    print(f"{failed_files} failed to create.")
 register_init.set_defaults(func=run_init)
 
 def run_docs(parsed_argument):

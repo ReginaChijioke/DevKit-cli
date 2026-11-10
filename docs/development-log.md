@@ -518,3 +518,112 @@ The Project Generator remains in progress while additional refinement, filesyste
 - Review the automated tests for completeness.
 - Update the development documentation as further improvements are made.
 - Complete the Project Generator milestone before moving to Documentation Generation.
+
+## 10 November 2026 — Project Generator Error Handling, Final Testing and Documentation Update
+
+**Time:** 4:44 PM WAT  
+**Branch:** `feature/project-generator`
+
+### Work Completed
+
+Continued improving the Project Generator by strengthening filesystem error handling, protecting existing files, and improving creation summaries.
+
+**1. Project Directory Error Handling**
+
+- Added specific handling for `PermissionError` when creating the project directory.
+- Added general `OSError` handling for other filesystem-related failures.
+- Ensured the program displays an understandable error message and stops when the project directory cannot be created.
+
+**2. Folder Creation Error Handling**
+
+- Added error handling around individual folder creation operations.
+- Introduced separate counters for successful and failed folder creation.
+- Ensured a folder creation failure does not prevent the program from attempting to create the remaining folders.
+- Added reporting for folder creation results.
+
+**3. File Creation Error Handling**
+
+- Added error handling around individual file creation operations.
+- Introduced separate counters for successful and failed file creation.
+- Ensured a file creation failure does not prevent the program from attempting to create other requested files.
+- Added reporting for file creation results.
+
+**4. Existing File Protection**
+
+- Added a check to determine whether a requested file already exists.
+- Prevented existing files from being overwritten.
+- Ensured existing files are skipped rather than counted as newly created or failed files.
+
+**5. Automated Testing**
+
+Expanded the Project Generator test coverage to include:
+
+- Project directory permission errors.
+- General project directory filesystem errors.
+- Folder creation filesystem errors.
+- File creation filesystem errors.
+- Preservation of existing files.
+- Existing project validation.
+- Invalid project names and filenames.
+- Invalid folder mappings and folder names.
+- Duplicate folder names.
+- Duplicate filenames.
+
+**Test results:**
+
+- Total automated tests: 22.
+- Passed: 22.
+- Failed: 0.
+
+The complete test suite was executed successfully using:
+
+`python3 -m unittest discover -s tests -v`
+
+### Documentation Update
+
+Updated the README to reflect the latest Project Generator implementation, including:
+
+- Project and folder validation.
+- Grouped folder/file mapping.
+- Root-level file creation.
+- Duplicate detection.
+- Existing-file protection.
+- Filesystem error handling.
+- Separate folder and file success/failure summaries.
+- Updated automated testing results.
+
+### Concepts Practised
+
+- Python exception handling with `try` and `except`.
+- Understanding the relationship between `PermissionError` and `OSError`.
+- Filesystem operations using `pathlib`.
+- Managing success and failure counters.
+- Writing tests for expected filesystem failures.
+- Mocking filesystem operations with `unittest.mock`.
+- Testing file preservation and error-handling behaviour.
+- Keeping project documentation aligned with implementation.
+
+### Implementation Decisions
+
+- Existing files are preserved rather than overwritten.
+- Folder and file creation failures are tracked separately.
+- A failed folder or file operation does not automatically stop other creation attempts.
+- Partially created projects are preserved rather than automatically deleted when individual operations fail.
+- The Project Generator creates empty files and directories based on user input; it does not generate starter code or predefined file contents.
+
+### Current Project Status
+
+**Project Generator implementation and automated testing completed.**
+
+The feature has reached 22 passing automated tests. Remaining work focuses on final review, documentation verification, mentor feedback, and merging `feature/project-generator` into `main`.
+
+Documentation Generation and Project Doctor remain planned features.
+
+**Next Steps:**
+
+1. Complete the final Project Generator review.
+2. Verify the README and development log.
+3. Review the final Git changes.
+4. Commit and push the completed work.
+5. Address any mentor feedback on the existing pull request.
+6. Merge the feature branch into `main` after approval.

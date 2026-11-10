@@ -70,23 +70,32 @@ Automates the creation of customizable project directories, folders, and empty f
 **Implemented capabilities:**
 
 - Accept a project name through the `init` command.
-- Validate project names and reject invalid characters.
+- Reject empty project names.
+- Require project names to begin with a letter.
+- Allow only alphanumeric characters and underscores in project names.
 - Check whether a project directory already exists.
-- Create a new project directory.
+- Create a new project directory using `pathlib`.
+- Handle permission errors and other filesystem errors during project directory creation.
 - Interactively collect comma-separated folder names.
 - Remove unnecessary whitespace from folder names.
 - Ignore empty folder entries.
 - Require folder names to begin with a letter.
 - Allow alphanumeric characters, underscores, and hyphens in folder names.
-- Reject invalid folder names, including path-based entries and directory traversal names such as `.` and `..`.
+- Reject invalid folder names, including `.` and `..`.
 - Detect and reject duplicate folder names.
 - Create the requested folders inside the project directory.
+- Report successful and failed folder creation separately.
+- Handle filesystem errors during folder creation.
 - Accept grouped folder/file mappings.
 - Support `root` as the destination for files placed directly in the project root.
 - Validate folder mappings and reject references to folders that were not created.
 - Accept comma-separated filenames within a mapping.
 - Reject invalid filenames and nested file paths.
+- Detect duplicate filenames within a mapping.
 - Create empty files in the selected destinations using `pathlib`.
+- Detect existing files and skip them without overwriting their contents.
+- Handle filesystem errors during file creation.
+- Report successful and failed file creation separately.
 
 **Current input format:**
 
@@ -101,13 +110,9 @@ root: README.md, .gitignore
 
 In this example, DevKit creates the requested folders and empty files, with `root` representing the project directory itself.
 
-**Future improvements:**
+The Project Generator is designed around user-customizable project structures rather than forcing every developer to use one predefined template.
 
-- Improve filesystem error handling.
-- Refine input validation and user feedback.
-- Consider additional project templates and configuration options.
-
-DevKit's Project Generator is designed around user-customizable project structures rather than forcing every developer to use one predefined template.
+It creates the requested directories and empty files; it does not currently generate starter code or populate files with predefined content.
 
 ### 3. Documentation Generation
 
@@ -137,7 +142,7 @@ The command-line structure is established using Python's `argparse` module.
 
 | Command | Purpose | Current Behaviour |
 |---|---|---|
-| `doctor` | Environment Doctor | Checks the active Python version and Git availability and repository status. |
+| `doctor` | Environment Doctor | Checks the active Python version, Git availability, and repository status. |
 | `init` | Project Generator | Creates a project directory, validates and creates user-selected folders, and creates empty files through grouped mappings. |
 | `docs` | Documentation Generation | Displays the Documentation Generator introduction. |
 | `inspect` | Project Doctor | Displays the Project Doctor introduction. |
@@ -208,7 +213,7 @@ root: README.md, .gitignore
 
 DevKit validates the folder names, rejects duplicates and invalid entries, and creates the accepted folders.
 
-It then processes the grouped file mappings and creates empty files in the specified destinations.
+It then processes the grouped file mappings and creates empty files in the specified destinations. Existing files are preserved rather than overwritten.
 
 Run the other available commands:
 
@@ -266,10 +271,10 @@ Development follows an incremental approach:
 | 1 | Repository, project structure, and initial documentation | Completed |
 | 2 | CLI foundation, subcommand registration, and command routing | Completed |
 | 3 | Environment Doctor | Completed |
-| 4 | Project Generator | In Progress |
+| 4 | Project Generator | Implementation and testing completed; final review and merge preparation underway |
 | 5 | Documentation Generation | Planned |
 | 6 | Project Doctor | Planned |
-| 7 | Testing, debugging, and refinement | In Progress |
+| 7 | Testing, debugging, and refinement | Ongoing |
 
 The roadmap may be adjusted as development progresses and feedback is received.
 
@@ -279,7 +284,7 @@ Testing is an important part of development.
 
 The project uses Python's `unittest` framework to verify functionality and handle expected edge cases.
 
-**Environment Doctor automated tests:**
+### Environment Doctor automated tests
 
 1. Python version meets the minimum requirement.
 2. Python version is below the minimum requirement.
@@ -289,23 +294,29 @@ The project uses Python's `unittest` framework to verify functionality and handl
 6. Git encounters an unexpected error.
 7. Git executable is missing.
 
-**Project Generator automated tests:**
+### Project Generator automated tests
 
 1. Project directory, folders, and files are created successfully.
-2. Invalid project names are rejected.
-3. Existing project directories are rejected.
-4. Invalid filename paths are rejected.
-5. Parent directory filenames are rejected.
-6. Mappings to nonexistent folders are rejected.
-7. Invalid mapping formats are rejected.
-8. Invalid folder names are rejected.
-9. Duplicate folder names are rejected.
+2. Project directory permission errors are handled.
+3. General project directory filesystem errors are handled.
+4. Folder creation filesystem errors are handled.
+5. File creation filesystem errors are handled.
+6. Existing files are preserved and not overwritten.
+7. Invalid project names are rejected.
+8. Existing project directories are rejected.
+9. Invalid filename paths are rejected.
+10. Parent directory filenames are rejected.
+11. Mappings to nonexistent folders are rejected.
+12. Invalid mapping formats are rejected.
+13. Invalid folder names are rejected.
+14. Duplicate folder names are rejected.
+15. Duplicate filenames are rejected.
 
-**Current test results:**
+### Current test results
 
-- Total automated tests: 16.
-- Passed: 16.
-- Failed: 0.
+- Total automated tests: **22**.
+- Passed: **22**.
+- Failed: **0**.
 
 Run the test suite using:
 
@@ -329,7 +340,7 @@ DevKit CLI follows these principles:
 
 ## Project Status
 
-**Current stage:** CLI foundation and Environment Doctor completed; Project Generator implementation and testing in progress.
+**Current stage:** CLI foundation and Environment Doctor completed. Project Generator implementation and automated testing completed; final review and merge preparation underway.
 
 **Completed:**
 
@@ -352,20 +363,26 @@ DevKit CLI follows these principles:
 - Project name validation for the Project Generator.
 - Existing project directory detection.
 - Project directory creation using `pathlib`.
+- Project directory permission and filesystem error handling.
 - Interactive collection and creation of user-selected folders.
 - Folder-name validation and rejection of invalid path entries.
 - Duplicate folder-name detection.
+- Folder creation error handling and reporting.
 - Grouped folder/file mapping.
 - Support for placing files in selected folders or the project root.
 - Filename validation and rejection of nested paths.
+- Duplicate filename detection.
 - Empty file creation.
-- Sixteen automated tests passing across Environment Doctor and Project Generator.
+- Protection of existing files from accidental overwriting.
+- File creation error handling and reporting.
+- Separate folder and file success/failure summaries.
+- Twenty-two automated tests passing across Environment Doctor and Project Generator.
 
 **Currently in progress:**
 
-- Final refinement of Project Generator functionality.
-- Additional filesystem error handling.
-- Further validation and edge-case testing.
+- Final Project Generator review.
+- Final documentation verification.
+- Pull request review and preparation for merging into `main`.
 
 **Not yet implemented:**
 

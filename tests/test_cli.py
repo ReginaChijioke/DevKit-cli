@@ -377,7 +377,21 @@ class TestProjectGenerator(unittest.TestCase):
         self.assertFalse(Path("folder_validation_test/my folder").exists())
         self.assertFalse(Path("folder_validation_test/src/main").exists())
 
-        self.assertEqual(output.count("Invalid folder name."), 4)
+        self.assertIn(
+            "Folder name must start with a letter.",
+            output
+        )
+        self.assertIn(
+            "Folder name can only contain letters, numbers, underscores and hyphens.",
+            output
+        )
+        self.assertIn(
+            "Folder name cannot be '.' or '..'.",
+            output
+        )
+
+        self.assertIn("3 created successfully.", output)
+        self.assertIn("4 failed to create.", output)
 
     def test_duplicate_folder_names_are_rejected(self):
         output = self.run_init_and_capture_output(
@@ -392,7 +406,17 @@ class TestProjectGenerator(unittest.TestCase):
         self.assertTrue(Path("duplicate_folder_test/tests").is_dir())
         self.assertTrue(Path("duplicate_folder_test/docs").is_dir())
 
-        self.assertEqual(output.count("Duplicate folder name."), 2)
+        self.assertIn(
+            "Duplicate folder: 'src' has already been requested",
+            output
+        )
+        self.assertIn(
+            "Duplicate folder: 'tests' has already been requested",
+            output
+        )
+
+        self.assertIn("3 created successfully.", output)
+        self.assertIn("2 failed to create.", output)
 
     def test_duplicate_filenames_are_rejected(self):
         output = self.run_init_and_capture_output(

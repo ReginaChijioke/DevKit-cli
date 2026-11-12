@@ -64,9 +64,7 @@ class TestEnvironmentDoctor(unittest.TestCase):
 
     @patch("devkit.cli.subprocess.run")
     def test_python_version_below_requirement(self, mock_run):
-        mock_run.return_value = self.create_result(
-            returncode=0
-        )
+        mock_run.return_value = self.create_result(returncode=0)
 
         test_version = Mock()
         test_version.major = 3
@@ -417,6 +415,30 @@ class TestProjectGenerator(unittest.TestCase):
         self.assertIn("Duplicate filename.", output)
         self.assertIn("1 created successfully.", output)
         self.assertIn("0 failed to create.", output)
+
+    def test_filenames_with_spaces_are_rejected_and_other_extensions_accepted(self):
+        output = self.run_init_and_capture_output(
+            "language_agnostic_test",
+            [
+                "",
+                "root: my file.py, main.go",
+                ""
+            ]
+        )
+
+        self.assertFalse(
+            Path("language_agnostic_test/my file.py").exists()
+        )
+        self.assertTrue(
+            Path("language_agnostic_test/main.go").is_file()
+        )
+
+        self.assertIn(
+            "Invalid filename: spaces are not allowed.",
+            output
+        )
+        self.assertIn("1 created successfully.", output)
+        self.assertIn("1 failed to create.", output)
 
 
 if __name__ == "__main__":

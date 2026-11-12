@@ -627,3 +627,53 @@ Documentation Generation and Project Doctor remain planned features.
 4. Commit and push the completed work.
 5. Address any mentor feedback on the existing pull request.
 6. Merge the feature branch into `main` after approval.
+
+## 12 November 2026 — Project Generator Audit Improvements and Filename Validation
+
+**Time:** 9:20 AM WAT
+
+### Work Completed
+
+Following an audit session, additional validation improvements were identified and implemented in the Project Generator.
+
+The improvements include:
+
+- Added filename whitespace validation to reject filenames containing internal spaces.
+- Preserved support for filenames with surrounding whitespace by stripping unnecessary whitespace before validation.
+- Ensured invalid filenames are counted in the failed-file summary.
+- Updated validation to count rejected nested paths, invalid filename components, and duplicate filenames as failures.
+- Confirmed that different file extensions are accepted, supporting a language-agnostic project creation workflow.
+- Preserved support for extensionless files such as `Dockerfile` and `.gitignore`.
+
+### Design Decisions
+
+The Project Generator will remain language-agnostic rather than restricting developers to Python-specific file extensions.
+
+This allows developers working with languages such as Python, JavaScript, Go, Rust, and others to create their preferred project structures without unnecessary restrictions.
+
+Filename validation will reject internal spaces and unsafe path components while allowing different file extensions.
+
+The Documentation Generator's initial scanner scope remains Python-focused and can be expanded to support other languages in future development.
+
+### Testing
+
+Added an automated test covering:
+
+- Rejection of filenames containing spaces.
+- Acceptance of files with non-Python extensions.
+- Correct reporting of successful and failed file creation.
+
+**Test results:**
+- Total automated tests: 23
+- Passed: 23
+- Failed: 0
+
+Test command:
+
+`python3 -m unittest discover -s tests -v`
+
+### Current Status
+
+Project Generator audit improvements implemented and tested successfully.
+
+README update and development documentation synchronization remain to be completed before committing and pushing the latest changes to the `feature/project-generator` branch.

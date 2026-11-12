@@ -137,15 +137,22 @@ def run_init(parsed_argument):
             stripped_file = each_file.strip()
             if stripped_file == "":
                 continue
+            if len(stripped_file.split()) > 1:
+                print("Invalid filename: spaces are not allowed.")
+                failed_files += 1
+                continue
             file_name = Path(stripped_file).name
             if stripped_file != file_name:
                 print("Invalid filename")
+                failed_files += 1
                 continue
             if file_name == "" or file_name == "." or file_name == "..":
                 print("Invalid filename")
+                failed_files += 1
                 continue
             if file_name in cleaned_file_names:
                 print("Duplicate filename.")
+                failed_files += 1
                 continue
             cleaned_file_names.append(file_name)
         for file in cleaned_file_names:

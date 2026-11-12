@@ -72,15 +72,19 @@ def run_init(parsed_argument):
         return
     folder_names = input("Enter folder names: ").split(",")
     cleaned_names = []
+    successful_folders = 0
+    failed_folders = 0
     for name in folder_names:
         cleaned_name = name.strip()
         if not cleaned_name:
             continue
         if cleaned_name == "." or cleaned_name == "..":
-            print("Invalid folder name.")
+            print("Folder name cannot be '.' or '..'.")
+            failed_folders += 1
             continue
         if not cleaned_name[0].isalpha():
-            print("Invalid folder name.")
+            print("Folder name must start with a letter.")
+            failed_folders += 1
             continue
         folder_valid = True 
         for char in cleaned_name:
@@ -88,15 +92,16 @@ def run_init(parsed_argument):
                 folder_valid = False
                 break
         if folder_valid is False:
-            print("Invalid folder name.")
+            print("Folder name can only contain letters, numbers, underscores and hyphens.")
+            failed_folders += 1
             continue
         if cleaned_name in cleaned_names:
-            print("Duplicate folder name.")
+            print(f"Duplicate folder: '{cleaned_name}' has already been requested.")
+            failed_folders += 1
             continue
         else:
             cleaned_names.append(cleaned_name) 
-    successful_folders = 0
-    failed_folders = 0
+    
     for name in cleaned_names:
         try:
             folder_path = project_path / name

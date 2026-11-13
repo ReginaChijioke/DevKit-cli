@@ -677,3 +677,30 @@ Test command:
 Project Generator audit improvements implemented and tested successfully.
 
 README update and development documentation synchronization remain to be completed before committing and pushing the latest changes to the `feature/project-generator` branch.
+
+### 13 November 2026 — 9:33 AM WAT
+**Feature: Documentation Generator — Python Scanner and AST Inspection**
+
+**Work Completed**
+
+- Implemented `scan_python_files()` to recursively discover Python files using `os.walk()`.
+- Added directory exclusions for `.git`, `.venv`, `venv`, `__pycache__`, and `node_modules`.
+- Used `pathlib.Path` to collect project-relative file paths.
+- Implemented `inspect_python_files()` using Python's `ast` module.
+- Added detection of regular functions, classes, and asynchronous functions.
+- Added error handling for `OSError` and `SyntaxError`.
+- Implemented warning messages to identify files that cannot be read or parsed.
+- Used `continue` to skip problematic files while allowing inspection of remaining files.
+
+**Testing**
+
+- Added tests for file discovery in root and nested directories.
+- Tested excluded directory handling.
+- Tested function, class, and asynchronous function detection.
+- Tested collecting definitions across multiple files.
+- Added tests for unreadable files and invalid Python syntax.
+- Full test suite: **30 tests passed, 0 failed**.
+
+**Outcome**
+
+The initial Python scanning and AST inspection foundation of the Documentation Generator is implemented and tested. The scanner can discover Python source files, extract basic code definitions, and gracefully skip files that cannot be read or parsed.

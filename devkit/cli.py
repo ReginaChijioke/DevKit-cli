@@ -2,6 +2,7 @@ import argparse
 import subprocess 
 import sys 
 from pathlib import Path
+from devkit.ai_client import get_api_key
 parser = argparse.ArgumentParser(
     description="A developer-focused CLI application for project setup, environment diagnostics, documentation generation, and project inspection."
 )
@@ -180,7 +181,11 @@ def run_init(parsed_argument):
 register_init.set_defaults(func=run_init)
 
 def run_docs(parsed_argument):
-    print("DevKit Documentation Generator")
+    print("DevKit Documentation Generator.")
+    api_key = get_api_key()
+    if api_key is None:
+        print("Missing api key.")
+        return
 register_docs.set_defaults(func=run_docs)
 
 def run_inspect(parsed_argument):

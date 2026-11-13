@@ -9,7 +9,7 @@ import tempfile
 import os
 from pathlib import Path
 
-from devkit.cli import run_doctor, run_init
+from devkit.cli import run_doctor, run_init, run_docs
 
 
 class TestEnvironmentDoctor(unittest.TestCase):
@@ -463,6 +463,39 @@ class TestProjectGenerator(unittest.TestCase):
         )
         self.assertIn("1 created successfully.", output)
         self.assertIn("1 failed to create.", output)
+
+
+class TestDocumentationGenerator(unittest.TestCase):
+
+    def run_docs_and_capture_output(self):
+        output = StringIO()
+
+        with redirect_stdout(output):
+            run_docs(Namespace())
+
+        return output.getvalue()
+
+    @patch("devkit.cli.get_api_key")
+    def test_missing_api_key_displays_error(self, mock_get_api_key):
+        mock_get_api_key.return_value = None
+
+        output = self.run_docs_and_capture_output()
+
+        self.assertIn("DevKit Documentation Generator.", output)
+        self.assertIn("Missing api key.", output)
+        mock_get_api_key.assert_called_once()
+
+    @patch("devkit.cli.get_api_key")
+    def test_configured_api_key_does_not_display_missing_key_error(
+        self, mock_get_api_key
+    ):
+        mock_get_api_key.return_value = "test-key-123"
+
+        output = self.run_docs_and_capture_output()
+
+        self.assertIn("DevKit Documentation Generator.", output)
+        self.assertNotIn("Missing api key.", output)
+        mock_get_api_key.assert_called_once()
 
 
 if __name__ == "__main__":

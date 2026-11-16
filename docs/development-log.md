@@ -704,3 +704,95 @@ README update and development documentation synchronization remain to be complet
 **Outcome**
 
 The initial Python scanning and AST inspection foundation of the Documentation Generator is implemented and tested. The scanner can discover Python source files, extract basic code definitions, and gracefully skip files that cannot be read or parsed.
+
+## 16 November 2026 — 11:58 AM WAT
+
+### Documentation Generator — HTTP Fundamentals and API Communication
+
+**Today's focus:** Understanding HTTP requests and responses in preparation for integrating DevKit's Documentation Generator with the Groq API.
+
+#### 1. Practical HTTP exercises
+
+Created a separate `http_practice` directory using DevKit's Project Generator to practise HTTP communication independently.
+
+Created two practice files:
+- `urllib_practice.py`
+- `requests_practice.py`
+
+Set up a dedicated Python virtual environment and installed the third-party `requests` package.
+
+#### 2. Practised HTTP GET requests with urllib
+
+Used Python's built-in `urllib` package and JSONPlaceholder's test API.
+
+Learned and implemented:
+- Sending GET requests using `urllib.request.urlopen()`.
+- Retrieving HTTP status codes using `response.status`.
+- Reading response bodies using `response.read()`.
+- Understanding the difference between bytes and strings.
+- Decoding response bytes using `.decode("utf-8")`.
+- Parsing JSON strings into Python dictionaries using `json.loads()`.
+
+Also learned the difference between `json.load()` and `json.loads()`.
+
+#### 3. Practised HTTP GET requests with requests
+
+Used the third-party `requests` package to retrieve the same API resource.
+
+Learned and implemented:
+- Sending GET requests using `requests.get()`.
+- Retrieving status codes using `response.status_code`.
+- Accessing response text using `response.text`.
+- Parsing JSON responses directly into Python dictionaries using `response.json()`.
+- Accessing individual response fields using dictionary keys.
+
+Compared the `urllib` and `requests` approaches and understood how `requests` simplifies common HTTP operations.
+
+#### 4. HTTP error handling
+
+Introduced `try/except` for handling request-related errors.
+
+Learned:
+- `requests.exceptions.RequestException`.
+- The purpose of `response.raise_for_status()`.
+- Why unsuccessful HTTP status codes do not automatically raise exceptions with `requests`.
+- How to detect HTTP errors before processing the response.
+
+**Practical test:** Changed the endpoint to `/posts/999999` to simulate a missing resource. Received a `404 Client Error: Not Found`, confirming that the error-handling logic worked.
+
+#### 5. Preparing for Groq API integration
+
+Reviewed the separation of responsibilities within DevKit:
+
+- `cli.py` coordinates the Documentation Generator workflow.
+- `scanner.py` inspects project files and extracts useful information.
+- `ai_client.py` handles communication with the AI provider.
+
+Introduced the difference between HTTP GET and POST methods.
+
+Established that DevKit will use POST to send project information and generation instructions to Groq for README generation.
+
+### Key concepts learned
+
+- HTTP requests and responses.
+- GET versus POST.
+- HTTP status codes.
+- Response bodies.
+- Bytes versus strings.
+- JSON serialization and parsing concepts.
+- Python dictionaries.
+- Built-in versus third-party packages.
+- HTTP error handling.
+- Separation of responsibilities between project modules.
+
+### Next steps
+
+Continue learning HTTP POST requests, including:
+
+1. Request headers.
+2. JSON request bodies.
+3. API authentication using API keys.
+4. Sending requests to Groq.
+5. Receiving and handling AI-generated responses.
+
+**Milestone:** Successfully completed practical GET request exercises using both `urllib` and `requests`, including JSON parsing and HTTP error handling. No Groq integration code has been implemented yet.

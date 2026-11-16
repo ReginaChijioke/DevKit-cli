@@ -18,7 +18,7 @@ class TestScanPythonFiles(unittest.TestCase):
 
             result = scan_python_files(project_path)
 
-            self.assertIn(Path("main.py"), result)
+            self.assertIn("main.py", result)
 
     def test_finds_python_files_in_nested_directories(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -29,7 +29,7 @@ class TestScanPythonFiles(unittest.TestCase):
 
             result = scan_python_files(project_path)
 
-            self.assertIn(Path("app/views.py"), result)
+            self.assertIn("app/views.py", result)
 
     def test_ignores_excluded_directories(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -41,7 +41,7 @@ class TestScanPythonFiles(unittest.TestCase):
 
             result = scan_python_files(project_path)
 
-            self.assertNotIn(Path(".venv/ignored.py"), result)
+            self.assertNotIn(".venv/ignored.py", result)
 
     def test_detects_functions_classes_and_async_functions(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -120,8 +120,8 @@ async def fetch_data():
             working_file.write_text("def working_function():\n    pass")
 
             python_files = [
-                Path("broken.py"),
-                Path("working.py")
+                "broken.py",
+                "working.py"
             ]
 
             original_read_text = Path.read_text

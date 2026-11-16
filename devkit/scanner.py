@@ -21,7 +21,7 @@ def scan_python_files(project_path):
         for filename in filenames:
             if filename.endswith(".py"):
                 file_path = Path(dirpath) / filename
-                relative_path = file_path.relative_to(project_path)
+                relative_path = str(file_path.relative_to(project_path))
                 python_files.append(relative_path)
 
     return python_files

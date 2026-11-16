@@ -467,6 +467,13 @@ class TestProjectGenerator(unittest.TestCase):
 
 class TestDocumentationGenerator(unittest.TestCase):
 
+    def setUp(self):
+        self.temp_directory = tempfile.TemporaryDirectory()
+        self.project_path = Path(self.temp_directory.name)
+
+    def tearDown(self):
+        self.temp_directory.cleanup()
+
     def run_docs_and_capture_output(self):
         output = StringIO()
 
@@ -474,6 +481,32 @@ class TestDocumentationGenerator(unittest.TestCase):
             run_docs(Namespace())
 
         return output.getvalue()
+
+    def run_docs_with_successful_dependencies(
+        self,
+        user_input="yes",
+        readme_content="# Sample project"
+    ):
+        output = StringIO()
+
+        with (
+            patch("devkit.cli.Path.cwd", return_value=self.project_path),
+            patch("devkit.cli.get_api_key", return_value="test-key-123"),
+            patch("devkit.cli.scan_python_files", return_value=["main.py"]),
+            patch(
+                "devkit.cli.inspect_python_files",
+                return_value=(["greet"], [], [])
+            ),
+            patch(
+                "devkit.cli.generate_readme",
+                return_value=readme_content
+            ) as mock_generate_readme,
+            patch("builtins.input", return_value=user_input)
+        ):
+            with redirect_stdout(output):
+                run_docs(Namespace())
+
+        return output.getvalue(), mock_generate_readme
 
     @patch("devkit.cli.get_api_key")
     def test_missing_api_key_displays_error(self, mock_get_api_key):
@@ -485,17 +518,83 @@ class TestDocumentationGenerator(unittest.TestCase):
         self.assertIn("Missing api key.", output)
         mock_get_api_key.assert_called_once()
 
-    @patch("devkit.cli.get_api_key")
-    def test_configured_api_key_does_not_display_missing_key_error(
-        self, mock_get_api_key
-    ):
-        mock_get_api_key.return_value = "test-key-123"
+    def test_readme_is_generated_successfully(self):
+        output, mock_generate_readme = (
+            self.run_docs_with_successful_dependencies()
+        )
 
-        output = self.run_docs_and_capture_output()
+        readme_path = self.project_path / "README.md"
 
-        self.assertIn("DevKit Documentation Generator.", output)
-        self.assertNotIn("Missing api key.", output)
-        mock_get_api_key.assert_called_once()
+        self.assertTrue(readme_path.is_file())
+        self.assertEqual(readme_path.read_text(), "# Sample project")
+        self.assertIn("README generated successfully", output)
+
+        mock_generate_readme.assert_called_once_with(
+            "test-key-123",
+            {
+                "project_name": self.project_path.name,
+                "python_file": ["main.py"],
+                "functions": ["greet"],
+                "classes": [],
+                "async_functions": []
+            }
+        )
+
+    def test_readme_generation_failure_is_handled(self):
+        output, mock_generate_readme = (
+            self.run_docs_with_successful_dependencies(
+                readme_content=None
+            )
+        )
+
+        readme_path = self.project_path / "README.md"
+
+        self.assertIn("README generation failed.", output)
+        self.assertFalse(readme_path.exists())
+        mock_generate_readme.assert_called_once()
+
+    def test_user_declines_readme_overwrite(self):
+        readme_path = self.project_path / "README.md"
+        readme_path.write_text("Original README content")
+
+        output, mock_generate_readme = (
+            self.run_docs_with_successful_dependencies(user_input="no")
+        )
+
+        self.assertEqual(
+            readme_path.read_text(),
+            "Original README content"
+        )
+        self.assertIn("Overwriting denied", output)
+        mock_generate_readme.assert_called_once()
+
+    def test_user_accepts_readme_overwrite(self):
+        readme_path = self.project_path / "README.md"
+        readme_path.write_text("Original README content")
+
+        output, mock_generate_readme = (
+            self.run_docs_with_successful_dependencies(user_input="yes")
+        )
+
+        self.assertEqual(readme_path.read_text(), "# Sample project")
+        self.assertIn("README generated successfully", output)
+        mock_generate_readme.assert_called_once()
+
+    def test_readme_write_oserror_is_handled(self):
+        error_message = "Simulated file writing failure"
+
+        with patch.object(
+            Path,
+            "write_text",
+            side_effect=OSError(error_message)
+        ):
+            output, mock_generate_readme = (
+                self.run_docs_with_successful_dependencies()
+            )
+
+        self.assertIn(f"{error_message} occurred.", output)
+        self.assertNotIn("README generated successfully", output)
+        mock_generate_readme.assert_called_once()
 
 
 if __name__ == "__main__":

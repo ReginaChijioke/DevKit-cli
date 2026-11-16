@@ -796,3 +796,32 @@ Continue learning HTTP POST requests, including:
 5. Receiving and handling AI-generated responses.
 
 **Milestone:** Successfully completed practical GET request exercises using both `urllib` and `requests`, including JSON parsing and HTTP error handling. No Groq integration code has been implemented yet.
+
+## 16 November 2026 — 4:39 PM WAT
+
+### Documentation Generator — AI Integration and Workflow Completion
+
+Completed the core V1 Documentation Generator workflow, integrating Groq's API to generate project-specific README documentation.
+
+**Implemented:**
+- Added secure API key retrieval using the `GROQ_API_KEY` environment variable, with a hidden-input prompt as a fallback.
+- Integrated the Groq Chat Completions API using the `openai/gpt-oss-120b` model.
+- Connected the project scanner and AST inspection results to the README-generation workflow.
+- Prepared project metadata in JSON format for the AI request.
+- Added README generation failure handling.
+- Added confirmation before overwriting an existing README.
+- Added filesystem error handling when writing the generated README.
+- Kept the generated documentation grounded in the project information supplied to the model.
+
+**Testing:**
+- Added integration tests covering missing API keys, successful generation, generation failure, overwrite approval and rejection, and file-writing errors.
+- Verified the complete test suite.
+
+**Test result:** 44 tests passing.
+
+**Outcome:** The Documentation Generator can now scan a Python project, inspect its structure, send the collected information to Groq, and generate a project-specific `README.md`.
+
+**Future considerations:**
+- Improve API response validation and request reliability.
+- Revisit dependency installation and packaging when DevKit is prepared for distribution.
+- Consider additional AI providers and model-selection options in a future version.

@@ -217,6 +217,7 @@ register_docs.set_defaults(func=run_docs)
 def run_inspect(parsed_argument):
     print("DevKit Project Doctor")
     project_path = Path.cwd()
+    recommendations = []
     project_directory = project_path.name
     print(project_directory)
     python_files = scan_python_files(project_path)
@@ -227,6 +228,8 @@ def run_inspect(parsed_argument):
     print(f"classes found: {len(classes)}")
     print(f"async_functions: {len(async_functions)}")
     syntax_errors = find_syntax_errors(project_path, python_files)
+    if syntax_errors:
+        recommendations.append("Fix the reported syntax errors before running your project.")
     print(f"Syntax errors found: {len(syntax_errors)}")
     for error in syntax_errors:
         print(f"File: {error['filename']}")
@@ -237,6 +240,7 @@ def run_inspect(parsed_argument):
         print("README found")
     else:
         print("README missing")
+        recommendations.append("Create a README.md file to document your project's purpose, features, installation, and usage.")
     tests_dir_path = project_path / "tests"
     if tests_dir_path.is_dir():
         test_files = list(tests_dir_path.rglob("test*.py"))
@@ -244,9 +248,35 @@ def run_inspect(parsed_argument):
             print(f"Test files found: {len(test_files)}")
         else:
             print("No test file found")
+            recommendations.append("Add test files to the tests directory to verify your project's functionality.")
     else:
         print("Test directory missing")
-    
+        recommendations.append("Create a tests directory to organize your project's automated tests.")
+    requirements_path = project_path / "requirements.txt"
+    if requirements_path.exists():
+        print("Requirements.txt found")
+    else:
+        print("Requirements.txt is missing")
+        recommendations.append("Consider adding a requirements.txt file to document your project's dependencies.")
+    project_toml_path = project_path / "pyproject.toml"
+    if project_toml_path.exists():
+        print("pyproject.toml found")
+    else:
+        print("pyproject.toml is missing")
+        recommendations.append("Consider adding a pyproject.toml file for modern Python project metadata and build configuration.")
+    gitignore_path = project_path / ".gitignore"
+    if gitignore_path.exists():
+        print("Gitignore found")
+    else:
+        print("Gitignore is missing")
+        recommendations.append("Create a .gitignore file to exclude unnecessary files and directories.")
+    if recommendations:
+        print("Recommendations:")
+        for recommendation in recommendations:
+            print(recommendation)
+    else:
+        print("No recommendations. Your project looks good!")
+
 register_inspect.set_defaults(func=run_inspect)
 
 def main():

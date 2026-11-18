@@ -82,6 +82,8 @@ def generate_readme(api_key, project_info):
         post_data = response.json()
     except requests.exceptions.RequestException as error:
         print(error)
+        if error.response:
+            print(error.response.text)
         return None
     try:
         readme_content =  post_data["choices"][0]["message"]["content"]

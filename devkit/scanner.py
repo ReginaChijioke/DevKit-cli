@@ -59,3 +59,24 @@ def inspect_python_files(project_path, python_files):
                 classes.append(node.name)
 
     return functions, classes, async_functions
+
+def find_syntax_errors(project_path, python_files):
+    syntax_errors = []
+    project_path = Path(project_path)
+    for each_relative_path in python_files:
+        full_file_path = project_path / each_relative_path
+        try:
+
+            source_code = full_file_path.read_text()
+            ast.parse(source_code)
+        except OSError as error:
+            print(f"Warning: Could not read {each_relative_path} - {error}")
+            continue
+        except SyntaxError as err:
+            error_message = {
+                "filename" : each_relative_path,
+                "message" : err.msg,
+                "line" : err.lineno
+            }
+            syntax_errors.append(error_message)
+    return syntax_errors

@@ -70,37 +70,45 @@ def run_init(parsed_argument):
     except OSError as error:
         print(f"Could not create project directory: {error}")
         return
-    folder_names = input("Enter folder names: ").split(",")
-    cleaned_names = []
     successful_folders = 0
     failed_folders = 0
-    for name in folder_names:
-        cleaned_name = name.strip()
-        if not cleaned_name:
-            continue
-        if cleaned_name == "." or cleaned_name == "..":
-            print("Folder name cannot be '.' or '..'.")
-            failed_folders += 1
-            continue
-        if not cleaned_name[0].isalpha():
-            print("Folder name must start with a letter.")
-            failed_folders += 1
-            continue
-        folder_valid = True 
-        for char in cleaned_name:
-            if not char.isalnum() and char != "_" and char != "-":
-                folder_valid = False
+    while True:
+        folder_names = input("Enter folder names: ").split(",")
+        cleaned_names = []
+        all_folders_valid = True
+        for name in folder_names:
+            cleaned_name = name.strip()
+            if not cleaned_name:
+                print("Folder name cannot be empty.")
+                all_folders_valid = False
                 break
-        if folder_valid is False:
-            print("Folder name can only contain letters, numbers, underscores and hyphens.")
-            failed_folders += 1
+            if cleaned_name == "." or cleaned_name == "..":
+                print("Folder name cannot be '.' or '..'.")
+                all_folders_valid = False
+                break
+            if not cleaned_name[0].isalpha():
+                print("Folder name must start with a letter.")
+                all_folders_valid = False
+                break
+            folder_valid = True
+            for char in cleaned_name:
+                if not char.isalnum() and char != "_" and char != "-":
+                    folder_valid = False
+                    break
+            if folder_valid is False:
+                print("Folder name can only contain letters, numbers, underscores and hyphens.")
+                all_folders_valid = False
+                break
+            if cleaned_name in cleaned_names:
+                print(f"Duplicate folder: '{cleaned_name}' has already been requested.")
+                all_folders_valid = False
+                break
+            else:
+                cleaned_names.append(cleaned_name)
+        if not all_folders_valid:
+            print("Invalid folder names. Please try again.")
             continue
-        if cleaned_name in cleaned_names:
-            print(f"Duplicate folder: '{cleaned_name}' has already been requested.")
-            failed_folders += 1
-            continue
-        else:
-            cleaned_names.append(cleaned_name) 
+        break
     
     for name in cleaned_names:
         try:

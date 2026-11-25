@@ -325,7 +325,7 @@ class TestProjectGenerator(unittest.TestCase):
         output = self.run_init_and_capture_output(
             "parent_test",
             [
-                "",
+                "src",
                 "root: ..",
                 ""
             ]
@@ -344,9 +344,7 @@ class TestProjectGenerator(unittest.TestCase):
         )
 
         self.assertIn("Folder does not exist", output)
-        self.assertFalse(
-            Path("mapping_test/main.py").exists()
-        )
+        self.assertFalse(Path("mapping_test/main.py").exists())
 
     def test_invalid_mapping_format_is_rejected(self):
         output = self.run_init_and_capture_output(
@@ -364,18 +362,24 @@ class TestProjectGenerator(unittest.TestCase):
         output = self.run_init_and_capture_output(
             "folder_validation_test",
             [
-                "src, test_files, my-project, 123folder, src/main, my folder, ..",
+                "123folder",
+                "my folder",
+                "..",
+                "src, test_files, my-project",
                 ""
             ]
         )
 
-        self.assertTrue(Path("folder_validation_test/src").is_dir())
-        self.assertTrue(Path("folder_validation_test/test_files").is_dir())
-        self.assertTrue(Path("folder_validation_test/my-project").is_dir())
+        project_path = Path("folder_validation_test")
 
-        self.assertFalse(Path("folder_validation_test/123folder").exists())
-        self.assertFalse(Path("folder_validation_test/my folder").exists())
-        self.assertFalse(Path("folder_validation_test/src/main").exists())
+        self.assertTrue((project_path / "src").is_dir())
+        self.assertTrue((project_path / "test_files").is_dir())
+        self.assertTrue((project_path / "my-project").is_dir())
+
+        self.assertEqual(
+            {path.name for path in project_path.iterdir()},
+            {"src", "test_files", "my-project"}
+        )
 
         self.assertIn(
             "Folder name must start with a letter.",
@@ -390,14 +394,16 @@ class TestProjectGenerator(unittest.TestCase):
             output
         )
 
+        self.assertIn("Invalid folder names. Please try again.", output)
         self.assertIn("3 created successfully.", output)
-        self.assertIn("4 failed to create.", output)
+        self.assertIn("0 failed to create.", output)
 
     def test_duplicate_folder_names_are_rejected(self):
         output = self.run_init_and_capture_output(
             "duplicate_folder_test",
             [
                 "src, tests, src, docs, tests",
+                "src, tests, docs",
                 ""
             ]
         )
@@ -410,13 +416,10 @@ class TestProjectGenerator(unittest.TestCase):
             "Duplicate folder: 'src' has already been requested",
             output
         )
-        self.assertIn(
-            "Duplicate folder: 'tests' has already been requested",
-            output
-        )
 
+        self.assertIn("Invalid folder names. Please try again.", output)
         self.assertIn("3 created successfully.", output)
-        self.assertIn("2 failed to create.", output)
+        self.assertIn("0 failed to create.", output)
 
     def test_duplicate_filenames_are_rejected(self):
         output = self.run_init_and_capture_output(
@@ -444,7 +447,7 @@ class TestProjectGenerator(unittest.TestCase):
         output = self.run_init_and_capture_output(
             "language_agnostic_test",
             [
-                "",
+                "src",
                 "root: my file.py, main.go",
                 ""
             ]

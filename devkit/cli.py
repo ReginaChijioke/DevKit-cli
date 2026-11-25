@@ -5,7 +5,15 @@ from pathlib import Path
 from devkit.ai_client import get_api_key, generate_readme
 from devkit.scanner import scan_python_files, inspect_python_files
 parser = argparse.ArgumentParser(
-    description="A developer-focused CLI application for project setup, environment diagnostics, documentation generation, and project inspection."
+    description=(
+        "A developer-focused CLI application for project setup, environment "
+        "diagnostics, documentation generation, and project inspection.\n\n"
+        "Documentation Generator:\n"
+        "The 'docs' command requires a Groq API key. Generate one at "
+        "https://console.groq.com/keys.\n"
+        "Set it as the GROQ_API_KEY environment variable or provide it "
+        "when prompted."
+    )
 )
 
 sub_parser = parser.add_subparsers()

@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(
         "A developer-focused CLI application for project setup, environment "
         "diagnostics, documentation generation, and project inspection.\n\n"
         "Documentation Generator:\n"
-        "The 'docs' command requires a Groq API key. Generate one at "
+        "The 'docs' command requires a Groq API key.\n\nGenerate one at "
         "https://console.groq.com/keys.\n"
         "Set it as the GROQ_API_KEY environment variable or provide it "
         "when prompted."

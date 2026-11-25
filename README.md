@@ -2,7 +2,7 @@
 
 **Build consistently. Develop confidently.**
 
-A Python-first command-line developer tool designed to simplify project initialization, environment checks, AI-powered documentation generation, and project inspection. Its Project Generator supports customizable project structures across programming languages.
+A Python-first command-line developer toolkit designed to simplify project initialization, environment checks, AI-powered documentation generation, and project inspection. Its Project Generator supports customizable project structures across programming languages.
 
 ## Overview
 
@@ -10,7 +10,12 @@ DevKit CLI helps developers reduce repetitive work involved in creating and main
 
 Starting a new project often involves manually creating directories, configuring development environments, preparing documentation, and checking project structures. These tasks can be time-consuming and may lead to inconsistent setups.
 
-DevKit CLI brings these workflows together through a collection of command-line tools.
+DevKit CLI brings these workflows together through four command-line tools:
+
+- **Environment Doctor:** Checks Python and Git availability.
+- **Project Generator:** Creates customizable project structures.
+- **Documentation Generator:** Generates AI-powered README documentation.
+- **Project Doctor:** Inspects projects and recommends improvements.
 
 The project is Python-first: its CLI, Environment Doctor, and initial Documentation Generator scanner are built around Python. However, the Project Generator is language-agnostic and can create folders and empty files for projects written in different programming languages.
 
@@ -131,10 +136,11 @@ The initial V1 implementation uses Groq's Chat Completions API and the `openai/g
 - Retrieves the Groq API key from the `GROQ_API_KEY` environment variable.
 - Securely prompts for an API key using hidden input when the environment variable is unavailable.
 - Handles API request errors and unexpected response structures.
+- Displays available API error-response details when a request fails.
 - Handles unsuccessful README generation.
 - Checks whether a `README.md` already exists.
 - Requests user confirmation before overwriting an existing README.
-- Handles filesystem errors when writing the generated documentation.
+- Handles filesystem errors when writing generated documentation.
 
 **Current V1 scope:**
 
@@ -144,24 +150,48 @@ The initial V1 implementation uses Groq's Chat Completions API and the `openai/g
 - The generated output is a Markdown `README.md` file.
 - The generator scans the current working directory.
 
-**Future improvements:**
+**Current distribution status:**
 
-- Support additional AI providers and models.
-- Allow users to select their preferred AI model.
-- Expand language-aware project analysis.
-- Improve API response validation and request reliability.
-- Add more documentation customization options.
+The Documentation Generator has been tested from an external project directory using the installed DevKit wheel in a fresh virtual environment. It can run without manually configuring `PYTHONPATH`.
 
 ### 4. Project Doctor
 
-The Project Doctor is planned as a project inspection tool. Its initial scope will focus on Python projects.
+Inspects an existing project, reports findings, and recommends improvements.
 
-**Planned capabilities:**
+The initial V1 implementation focuses on Python projects.
 
-- Check for expected project files and directories.
-- Identify missing or incorrectly organized components.
-- Report potential configuration issues.
-- Provide actionable recommendations for improvement.
+**Implemented capabilities:**
+
+- Displays the name of the project being inspected.
+- Scans the project for Python files.
+- Reports the number of Python files discovered.
+- Uses AST inspection to identify functions, classes, and asynchronous functions.
+- Detects Python syntax errors.
+- Reports syntax-error filenames, messages, and line numbers.
+- Checks whether a `README.md` file exists.
+- Checks whether a `tests/` directory exists.
+- Searches for test files matching the `test*.py` naming pattern.
+- Reports the number of discovered test files.
+- Identifies test directories that contain no matching test files.
+- Checks for `requirements.txt`.
+- Checks for `pyproject.toml`.
+- Checks for `.gitignore`.
+- Generates actionable recommendations for missing project components.
+- Recommends fixing detected syntax errors.
+- Displays a positive message when no recommendations are necessary.
+
+**Current V1 scope:**
+
+Project Doctor is an inspection and recommendation tool. It reports findings but does not automatically modify project files or repair detected issues.
+
+The initial scanner and syntax-error analysis are Python-focused.
+
+**Future improvements:**
+
+- Expand project analysis beyond Python.
+- Detect additional configuration and structural issues.
+- Provide more detailed dependency analysis.
+- Introduce more advanced project health checks.
 
 ## Current CLI Commands
 
@@ -172,7 +202,7 @@ The CLI uses Python's `argparse` module for command registration and routing.
 | `doctor` | Environment Doctor | Checks the active Python version, Git availability, and repository status. |
 | `init` | Project Generator | Creates customizable project directories, folders, and empty files. |
 | `docs` | Documentation Generator | Scans the current Python project and generates an AI-powered README using Groq. |
-| `inspect` | Project Doctor | Displays the Project Doctor introduction; inspection functionality is planned. |
+| `inspect` | Project Doctor | Inspects Python files, checks common project components, reports syntax errors, and recommends improvements. |
 
 When DevKit is executed without a subcommand, it displays the general CLI help information.
 
@@ -183,11 +213,24 @@ When DevKit is executed without a subcommand, it displays the general CLI help i
 - Python 3.11 or later.
 - Git for version control and collaboration.
 - A Groq API key for the Documentation Generator.
-- `requests` for the current Groq API integration.
 
-### Installation
+The `requests` dependency is declared in the package configuration and is installed automatically during package installation.
 
-Clone the repository:
+### Package Installation
+
+**PyPI publication is not yet complete.**
+
+Once DevKit is published, users will be able to install it using:
+
+```bash
+python3 -m pip install devkit-cli
+```
+
+The installed package provides the `devkit` terminal command.
+
+### Installing the Development Version
+
+To work with the current source code, clone the repository:
 
 ```bash
 git clone https://github.com/ReginaChijioke/DevKit-cli.git
@@ -206,38 +249,50 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-Install the current external API dependency:
+Install the development package:
 
 ```bash
-python3 -m pip install requests
+python3 -m pip install .
 ```
 
-Dependency packaging and automated installation for end users will be addressed when DevKit is prepared for distribution.
+This installs the declared runtime dependencies and registers the `devkit` command in the active environment.
+
+### Installing a Locally Built Wheel
+
+Before PyPI publication, testers can install a locally built wheel.
+
+After building the package, install it using:
+
+```bash
+python3 -m pip install dist/devkit_cli-0.1.0-py3-none-any.whl
+```
+
+The wheel can be shared with testers who have Python 3.11 or later.
 
 ### Running the CLI
 
 Display general help:
 
 ```bash
-python3 -m devkit.cli
+devkit --help
 ```
 
-Display available commands:
+Display the available commands:
 
 ```bash
-python3 -m devkit.cli --help
+devkit
 ```
 
 ### Run the Environment Doctor
 
 ```bash
-python3 -m devkit.cli doctor
+devkit doctor
 ```
 
 ### Run the Project Generator
 
 ```bash
-python3 -m devkit.cli init weather_app
+devkit init weather_app
 ```
 
 DevKit validates the project name, checks whether the project already exists, and creates the project directory.
@@ -275,7 +330,7 @@ Alternatively, if the environment variable is not configured, DevKit securely pr
 Navigate into the Python project you want to document, then run:
 
 ```bash
-python3 -m devkit.cli docs
+devkit docs
 ```
 
 The Documentation Generator:
@@ -285,7 +340,7 @@ The Documentation Generator:
 3. Collects project information.
 4. Sends the information to Groq.
 5. Receives generated Markdown documentation.
-6. Writes the output to `README.md`.
+6. Writes the output to `README.md` in the current working directory.
 
 If a README already exists, DevKit asks for confirmation before overwriting it.
 
@@ -294,10 +349,10 @@ The API key is not hardcoded into the project or automatically saved by the curr
 ### Run the Project Doctor
 
 ```bash
-python3 -m devkit.cli inspect
+devkit inspect
 ```
 
-The command is registered, but its project inspection functionality is still planned.
+The Project Doctor scans the current project, reports its findings, and provides recommendations for improvement.
 
 ## Technology Stack
 
@@ -317,6 +372,7 @@ The command is registered, but its project inspection functionality is still pla
 | `unittest.mock` | Mocking dependencies during tests |
 | `tempfile` | Isolated temporary directories for testing |
 | Groq API | AI-powered README generation |
+| setuptools | Python package build system |
 | Git and GitHub | Version control and collaboration |
 
 The project prioritizes Python's standard library where practical while using external dependencies where required.
@@ -356,9 +412,12 @@ Development follows an incremental approach.
 | 2 | CLI foundation, subcommand registration, and command routing | Completed |
 | 3 | Environment Doctor | Completed |
 | 4 | Project Generator | Implemented and tested; pull request awaiting mentor review |
-| 5 | Documentation Generator | V1 implemented and tested |
-| 6 | Project Doctor | Planned |
+| 5 | Documentation Generator | V1 implemented and tested; pull request awaiting mentor review |
+| 6 | Project Doctor | V1 implemented and tested |
 | 7 | Testing, debugging, and refinement | Ongoing |
+| 8 | Python package configuration and installation | Implemented and locally tested |
+| 9 | External project testing | Completed |
+| 10 | Mentor review, release preparation, and PyPI publication | Pending |
 
 The roadmap may be adjusted as development progresses and feedback is received.
 
@@ -368,26 +427,41 @@ DevKit uses Python's `unittest` framework to verify functionality, expected beha
 
 The test suite covers:
 
-- Environment Doctor: Python version checks, Git detection, and Git error handling.
-- Project Generator: project and folder validation, duplicate detection, file mappings, filesystem errors, and protection of existing files.
-- Documentation Generator CLI workflow: missing API keys, successful generation, generation failures, overwrite approval and rejection, and file-writing errors.
-- Documentation scanner: Python file discovery, excluded directories, AST inspection, syntax errors, and unreadable files.
-- AI client: API key retrieval, successful API responses, request failures, and unexpected response structures.
+- **Environment Doctor:** Python version checks, Git detection, and Git error handling.
+- **Project Generator:** Project and folder validation, duplicate detection, file mappings, filesystem errors, and protection of existing files.
+- **Documentation Generator CLI workflow:** Missing API keys, successful generation, generation failures, overwrite approval and rejection, and file-writing errors.
+- **Documentation scanner:** Python file discovery, excluded directories, AST inspection, syntax errors, and unreadable files.
+- **AI client:** API key retrieval, successful API responses, request failures, and unexpected response structures.
+- **Project Doctor:** Project overview, Python analysis, syntax-error reporting, missing project components, test-directory checks, and recommendations.
 
-### Current test results
+### Current Test Results
 
-**44 automated tests passing.**
+**53 automated tests passing.**
 
-- Passed: 44
+- Passed: 53
 - Failed: 0
 
 Run the complete test suite:
 
 ```bash
-python3 -m unittest discover -s tests -v
+python3 -m unittest discover -v
 ```
 
 The tests use temporary directories and mocked dependencies where appropriate to isolate filesystem and API-related operations.
+
+### External Installation Testing
+
+The locally built wheel was installed into a fresh virtual environment and tested from an external project directory.
+
+The following were verified:
+
+- Package installation through pip.
+- Automatic installation of the declared `requests` dependency.
+- Availability of the `devkit` console command outside the source repository.
+- Registration of all four CLI commands.
+- Successful execution of `doctor`, `init`, `docs`, and `inspect`.
+- Secure API-key prompting when `GROQ_API_KEY` is unavailable to the process.
+- Successful README generation in the external project.
 
 ## Design Principles
 
@@ -404,7 +478,7 @@ DevKit CLI follows these principles:
 
 ## Project Status
 
-**Current stage:** CLI foundation, Environment Doctor, Project Generator, and Documentation Generator V1 implemented.
+**Current stage:** Four core CLI features implemented and tested; package configuration and external installation testing completed. Mentor review and PyPI release preparation remain in progress.
 
 ### Completed
 
@@ -420,6 +494,7 @@ DevKit CLI follows these principles:
 - Filesystem error handling and operation summaries.
 - Python project scanner.
 - AST-based inspection of functions, classes, and asynchronous functions.
+- Python syntax-error detection and reporting.
 - Groq API integration.
 - Secure API key retrieval.
 - JSON-compatible project metadata preparation.
@@ -427,21 +502,33 @@ DevKit CLI follows these principles:
 - README generation failure handling.
 - Existing README overwrite confirmation.
 - README filesystem error handling.
-- Automated tests for the scanner, AI client, and Documentation Generator workflow.
-- **44 automated tests passing.**
+- Project Doctor implementation.
+- Project structure and configuration checks.
+- Actionable project improvement recommendations.
+- Automated tests for the scanner, AI client, and CLI features.
+- **53 automated tests passing.**
+- Python package configuration through `pyproject.toml`.
+- Console entry point configuration for the `devkit` command.
+- Local wheel and source distribution builds.
+- Installation and testing of the wheel in a fresh virtual environment.
+- External project testing of all four CLI commands.
+- Automatic installation of declared runtime dependencies.
 
 ### Currently in progress
 
-- Mentor review of the Project Generator pull request.
-- Continued refinement and testing of Documentation Generator V1.
+- Mentor review of feature pull requests.
+- Final packaging and release checks.
+- PyPI publication preparation.
 - README and development-log synchronization.
 
-### Not yet implemented
+### Future improvements
 
-- Project Doctor inspection functionality.
 - Multiple AI provider and model selection.
 - Language-aware scanning beyond the initial Python scope.
-- Automated dependency installation and packaging for distribution.
+- More advanced project inspection and recommendations.
+- Additional development environment checks.
+- Expanded documentation customization.
+- Advanced project templates and utilities.
 
 This README will be updated throughout development to reflect completed features, new commands, usage instructions, testing results, and changes to project scope.
 

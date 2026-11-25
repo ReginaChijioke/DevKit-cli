@@ -9,7 +9,7 @@ import tempfile
 import os
 from pathlib import Path
 
-from devkit.cli import run_doctor, run_init, run_docs
+from devkit.cli import run_doctor, run_init, run_docs, run_inspect
 
 
 class TestEnvironmentDoctor(unittest.TestCase):
@@ -598,6 +598,163 @@ class TestDocumentationGenerator(unittest.TestCase):
         self.assertIn(f"{error_message} occurred.", output)
         self.assertNotIn("README generated successfully", output)
         mock_generate_readme.assert_called_once()
+
+
+class TestProjectDoctor(unittest.TestCase):
+
+    def setUp(self):
+        self.temp_directory = tempfile.TemporaryDirectory()
+        self.project_path = Path(self.temp_directory.name)
+
+    def tearDown(self):
+        self.temp_directory.cleanup()
+
+    def run_inspect_and_capture_output(
+        self,
+        python_files=None,
+        functions=None,
+        classes=None,
+        async_functions=None,
+        syntax_errors=None
+    ):
+        output = StringIO()
+
+        if python_files is None:
+            python_files = ["main.py"]
+
+        if functions is None:
+            functions = ["greet"]
+
+        if classes is None:
+            classes = ["Student"]
+
+        if async_functions is None:
+            async_functions = ["fetch_data"]
+
+        if syntax_errors is None:
+            syntax_errors = []
+
+        with (
+            patch(
+                "devkit.cli.Path.cwd",
+                return_value=self.project_path
+            ),
+            patch(
+                "devkit.cli.scan_python_files",
+                return_value=python_files
+            ),
+            patch(
+                "devkit.cli.inspect_python_files",
+                return_value=(
+                    functions,
+                    classes,
+                    async_functions
+                )
+            ),
+            patch(
+                "devkit.cli.find_syntax_errors",
+                return_value=syntax_errors
+            )
+        ):
+            with redirect_stdout(output):
+                run_inspect(Namespace())
+
+        return output.getvalue()
+
+    def test_project_overview_and_python_analysis(self):
+        output = self.run_inspect_and_capture_output()
+
+        self.assertIn("DevKit Project Doctor", output)
+        self.assertIn(self.project_path.name, output)
+        self.assertIn("Python files found: 1", output)
+        self.assertIn("functions found: 1", output)
+        self.assertIn("classes found: 1", output)
+        self.assertIn("async_functions: 1", output)
+        self.assertIn("Syntax errors found: 0", output)
+
+    def test_syntax_errors_are_reported(self):
+        syntax_errors = [
+            {
+                "filename": "broken.py",
+                "message": "invalid syntax",
+                "line": 3
+            }
+        ]
+
+        output = self.run_inspect_and_capture_output(
+            syntax_errors=syntax_errors
+        )
+
+        self.assertIn("Syntax errors found: 1", output)
+        self.assertIn("File: broken.py", output)
+        self.assertIn("Error: invalid syntax", output)
+        self.assertIn("Line: 3", output)
+        self.assertIn(
+            "Fix the reported syntax errors before running your project.",
+            output
+        )
+
+    def test_missing_project_files_generate_recommendations(self):
+        output = self.run_inspect_and_capture_output()
+
+        self.assertIn("README missing", output)
+        self.assertIn("Test directory missing", output)
+        self.assertIn("Requirements.txt is missing", output)
+        self.assertIn("pyproject.toml is missing", output)
+        self.assertIn("Gitignore is missing", output)
+
+        self.assertIn("Recommendations:", output)
+        self.assertIn("Create a README.md file", output)
+        self.assertIn("Create a tests directory", output)
+        self.assertIn("requirements.txt file", output)
+        self.assertIn("pyproject.toml file", output)
+        self.assertIn("Create a .gitignore file", output)
+
+    def test_empty_tests_directory_generates_recommendation(self):
+        (self.project_path / "tests").mkdir()
+
+        output = self.run_inspect_and_capture_output()
+
+        self.assertIn("No test file found", output)
+        self.assertIn(
+            "Add test files to the tests directory",
+            output
+        )
+
+    def test_existing_test_files_are_counted(self):
+        tests_path = self.project_path / "tests"
+        tests_path.mkdir()
+
+        (tests_path / "test_cli.py").touch()
+        (tests_path / "test_scanner.py").touch()
+
+        output = self.run_inspect_and_capture_output()
+
+        self.assertIn("Test files found: 2", output)
+
+    def test_no_recommendations_when_all_checks_pass(self):
+        (self.project_path / "README.md").touch()
+
+        tests_path = self.project_path / "tests"
+        tests_path.mkdir()
+        (tests_path / "test_sample.py").touch()
+
+        (self.project_path / "requirements.txt").touch()
+        (self.project_path / "pyproject.toml").touch()
+        (self.project_path / ".gitignore").touch()
+
+        output = self.run_inspect_and_capture_output()
+
+        self.assertIn("README found", output)
+        self.assertIn("Test files found: 1", output)
+        self.assertIn("Requirements.txt found", output)
+        self.assertIn("pyproject.toml found", output)
+        self.assertIn("Gitignore found", output)
+        self.assertIn(
+            "No recommendations. Your project looks good!",
+            output
+        )
+        self.assertNotIn("Recommendations:", output)
 
 
 if __name__ == "__main__":

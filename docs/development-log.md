@@ -825,3 +825,219 @@ Completed the core V1 Documentation Generator workflow, integrating Groq's API t
 - Improve API response validation and request reliability.
 - Revisit dependency installation and packaging when DevKit is prepared for distribution.
 - Consider additional AI providers and model-selection options in a future version.
+
+## 18 November 2026 — 3:05 PM WAT
+
+### Project Doctor V1 Implementation, Testing and Packaging Preparation
+
+**Work completed**
+
+#### 1. Project Doctor implementation
+
+Implemented the Project Doctor (`inspect`) command to inspect existing Python projects and recommend improvements.
+
+Implemented capabilities include:
+
+- Project name and Python file count reporting.
+- AST-based inspection of functions, classes, and asynchronous functions.
+- Python syntax-error detection and reporting.
+- Reporting syntax-error filenames, messages, and line numbers.
+- README presence checks.
+- Tests directory and test-file checks.
+- Dependency declaration checks for `requirements.txt` and `pyproject.toml`.
+- `.gitignore` presence checks.
+- Actionable recommendations for missing project components and detected syntax errors.
+- Positive feedback when no recommendations are necessary.
+
+#### 2. Scanner improvements
+
+Added `find_syntax_errors()` to `devkit/scanner.py`.
+
+The function:
+
+- Parses discovered Python files to identify syntax errors.
+- Returns syntax-error details, including filenames and line numbers.
+- Handles unreadable files without stopping the inspection process.
+
+The new functionality was implemented separately to avoid changing the existing Documentation Generator scanner behaviour.
+
+#### 3. Automated testing
+
+Added six Project Doctor tests to `tests/test_cli.py`, covering:
+
+- Project overview and Python analysis.
+- Syntax-error reporting.
+- Missing project files and recommendations.
+- Empty tests directories.
+- Existing test-file detection and counting.
+- Projects with no outstanding recommendations.
+
+Added `tests/__init__.py` to make the test directory an explicit Python package.
+
+**Full test suite: 53 tests passed, 0 failures.**
+
+#### 4. Documentation update
+
+Updated `README.md` to reflect the current implementation of all four core features.
+
+The update includes:
+
+- Project Doctor implementation and capabilities.
+- Updated CLI command descriptions.
+- Scanner syntax-error detection.
+- Expanded testing coverage.
+- Updated test count from 44 to 53.
+- Revised development roadmap.
+- Current packaging and distribution status.
+
+#### 5. Packaging preparation
+
+Started preparing DevKit for distribution as an installable Python package.
+
+- Created `pyproject.toml`.
+- Added the initial build-system configuration using setuptools.
+- Identified the planned distribution name as `devkit-cli`.
+- Identified the intended terminal command as `devkit`.
+- Identified `devkit.cli:main` as the console entry point.
+- Began planning package metadata, dependency declarations, and installation configuration.
+
+#### 6. External project testing
+
+Tested the Documentation Generator from a separate project directory (`chris`) inside the DevKit repository.
+
+The command:
+
+`python3 -m devkit.cli docs`
+
+failed with `ModuleNotFoundError: No module named 'devkit'`.
+
+This confirmed that activating DevKit's virtual environment alone does not make the package importable from arbitrary external project directories.
+
+The issue is being addressed through proper package configuration and installation.
+
+**Current status**
+
+- Environment Doctor: Implemented and tested.
+- Project Generator: Implemented and tested; pull request awaiting mentor review.
+- Documentation Generator: V1 implemented and tested; pull request awaiting mentor review.
+- Project Doctor: V1 implemented and tested.
+- Automated tests: 53 passing.
+- Packaging and external project installation: In progress.
+- PyPI distribution: Planned.
+
+**Next steps**
+
+1. Complete `pyproject.toml` configuration.
+2. Declare project metadata and dependencies.
+3. Configure the `devkit` console entry point.
+4. Build and install DevKit locally.
+5. Test all commands from an external project directory.
+6. Prepare and test the package for PyPI publication.
+
+**Milestone:** Project Doctor V1 implemented, tested, documented, committed, and pushed to `feature/project-doctor`.
+
+Commit: `f36a82f` — Add Project Doctor command and tests.
+
+## 18 November 2026 — 3:48 PM WAT
+
+### Milestone: DevKit Packaging and External Installation Testing
+
+**Objective:** Prepare DevKit CLI for standalone installation and verify that all four commands work outside the source repository.
+
+#### 1. Python Package Configuration
+
+- Created `pyproject.toml` using setuptools as the build backend.
+- Configured the distribution name as `devkit-cli`.
+- Set the initial package version to `0.1.0`.
+- Specified Python 3.11 or later as the minimum requirement.
+- Declared `requests>=2.31` as a runtime dependency.
+- Configured the `devkit` console command to use `devkit.cli:main`.
+- Restricted the installed Python package to the `devkit` package.
+
+#### 2. Package Building and Installation
+
+- Installed the Python `build` package in the development environment.
+- Successfully built the source distribution and wheel.
+- Generated:
+  - `devkit_cli-0.1.0.tar.gz`
+  - `devkit_cli-0.1.0-py3-none-any.whl`
+- Successfully installed the wheel using pip.
+- Created a fresh `.test-venv` virtual environment for independent installation testing.
+- Verified that pip automatically installed DevKit's declared `requests` dependency.
+
+#### 3. External Project Testing
+
+Tested the installed DevKit package from an external project directory named `chris`, without manually configuring `PYTHONPATH`.
+
+Successfully verified:
+
+- `devkit --help` displays all four registered commands.
+- `devkit doctor` detects the active Python version and Git repository.
+- `devkit inspect` scans the external project and generates appropriate recommendations.
+- `devkit init packaging_test` creates the requested project structure and empty files.
+- `devkit docs` successfully generates and overwrites an external project's README.
+
+The API-key fallback was also tested using `env -u GROQ_API_KEY devkit docs`. DevKit securely prompted for the key and successfully completed README generation.
+
+#### 4. API Error Diagnostics
+
+- Improved the API client's request-error handling to display the server response body when available.
+- Investigated a previously encountered HTTP 413 error.
+- The error did not recur during the subsequent external installation test.
+- Root cause remains undetermined.
+
+#### 5. Repository Cleanup
+
+Updated `.gitignore` to exclude:
+
+- `.test-venv/`
+- `dist/`
+- `build/`
+- `*.egg-info/`
+- `chris/`
+
+Also corrected the existing virtual-environment ignore entry.
+
+Temporary testing and build artifacts are now excluded from Git status.
+
+#### 6. Documentation and Testing
+
+- Updated `README.md` to reflect the new packaging configuration.
+- Added development installation instructions.
+- Added local wheel installation instructions for testers.
+- Updated command examples to use the installed `devkit` command.
+- Documented successful external installation testing.
+- Updated the packaging and release roadmap.
+
+**Full test suite:**
+- Tests passed: 53
+- Tests failed: 0
+
+Command used:
+
+`python3 -m unittest discover -v`
+
+#### 7. Current Git Changes
+
+Files modified or added:
+
+- `.gitignore`
+- `README.md`
+- `devkit/ai_client.py`
+- `docs/development-log.md`
+- `pyproject.toml`
+
+These changes have not yet been committed.
+
+#### 8. Next Steps
+
+1. Review the packaging changes.
+2. Stage and commit the verified files.
+3. Push the packaging milestone to `feature/project-doctor`.
+4. Create the Project Doctor pull request targeting `feature/documentation-generator`.
+5. Await mentor review before merging.
+6. Complete release checks and publish DevKit CLI to PyPI after the required reviews.
+
+**Milestone result:** DevKit CLI successfully builds into installable Python distributions. All four commands have been tested successfully from an external project using a fresh virtual environment.
+
+**Current status:** Packaging implemented and locally tested; mentor review and PyPI publication remain pending.

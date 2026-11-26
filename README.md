@@ -80,6 +80,7 @@ Automates the creation of customizable project directories, folders, and empty f
 - Validates folder names, including rejecting `.` and `..`.
 - Allows letters, numbers, underscores, and hyphens in folder names.
 - Detects duplicate folder names.
+- Rejects invalid folder-name batches and prompts users to provide valid input again.
 - Reports successful and failed folder creation separately.
 - Accepts grouped folder/file mappings.
 - Supports `root` as the destination for files placed directly in the project root.
@@ -149,6 +150,12 @@ The initial V1 implementation uses Groq's Chat Completions API and the `openai/g
 - The scanner focuses on Python projects.
 - The generated output is a Markdown `README.md` file.
 - The generator scans the current working directory.
+
+**API key setup:**
+
+A Groq API key is required to use the Documentation Generator. Users can obtain one from the [Groq API Keys page](https://console.groq.com/keys).
+
+The key can be provided through the `GROQ_API_KEY` environment variable or entered when DevKit securely prompts for it.
 
 **Current distribution status:**
 
@@ -246,6 +253,7 @@ Create and activate a virtual environment:
 
 ```bash
 python3 -m venv .venv
+
 source .venv/bin/activate
 ```
 
@@ -411,13 +419,13 @@ Development follows an incremental approach.
 | 1 | Repository and initial project structure | Completed |
 | 2 | CLI foundation, subcommand registration, and command routing | Completed |
 | 3 | Environment Doctor | Completed |
-| 4 | Project Generator | Implemented and tested; pull request awaiting mentor review |
-| 5 | Documentation Generator | V1 implemented and tested; pull request awaiting mentor review |
-| 6 | Project Doctor | V1 implemented and tested |
-| 7 | Testing, debugging, and refinement | Ongoing |
+| 4 | Project Generator | Completed, reviewed, and merged |
+| 5 | Documentation Generator | V1 completed, reviewed, and merged |
+| 6 | Project Doctor | V1 completed and merged |
+| 7 | Testing, debugging, and refinement | Completed for the current core implementation |
 | 8 | Python package configuration and installation | Implemented and locally tested |
 | 9 | External project testing | Completed |
-| 10 | Mentor review, release preparation, and PyPI publication | Pending |
+| 10 | Final release preparation and PyPI publication | In progress |
 
 The roadmap may be adjusted as development progresses and feedback is received.
 
@@ -436,7 +444,7 @@ The test suite covers:
 
 ### Current Test Results
 
-**53 automated tests passing.**
+**Last verified test result: 53 automated tests passing.**
 
 - Passed: 53
 - Failed: 0
@@ -478,7 +486,7 @@ DevKit CLI follows these principles:
 
 ## Project Status
 
-**Current stage:** Four core CLI features implemented and tested; package configuration and external installation testing completed. Mentor review and PyPI release preparation remain in progress.
+**Current stage: Core implementation complete; final packaging and PyPI release preparation in progress.**
 
 ### Completed
 
@@ -491,6 +499,7 @@ DevKit CLI follows these principles:
 - Project Generator implementation, validation, and automated tests.
 - Language-agnostic project structure creation.
 - Folder and file mapping validation.
+- Final folder-name validation improvements.
 - Filesystem error handling and operation summaries.
 - Python project scanner.
 - AST-based inspection of functions, classes, and asynchronous functions.
@@ -502,26 +511,30 @@ DevKit CLI follows these principles:
 - README generation failure handling.
 - Existing README overwrite confirmation.
 - README filesystem error handling.
+- Groq API key guidance in CLI help.
 - Project Doctor implementation.
 - Project structure and configuration checks.
 - Actionable project improvement recommendations.
 - Automated tests for the scanner, AI client, and CLI features.
-- **53 automated tests passing.**
 - Python package configuration through `pyproject.toml`.
 - Console entry point configuration for the `devkit` command.
 - Local wheel and source distribution builds.
 - Installation and testing of the wheel in a fresh virtual environment.
 - External project testing of all four CLI commands.
 - Automatic installation of declared runtime dependencies.
+- Review and merging of the outstanding feature pull requests into `main`.
 
-### Currently in progress
+### Currently in Progress
 
-- Mentor review of feature pull requests.
+- Final review of the fresh integrated repository.
+- Re-running the complete test suite against the latest `main` branch.
 - Final packaging and release checks.
+- Verification of the distribution package name and its availability on PyPI.
+- License selection and addition.
+- TestPyPI release testing.
 - PyPI publication preparation.
-- README and development-log synchronization.
 
-### Future improvements
+### Future Improvements
 
 - Multiple AI provider and model selection.
 - Language-aware scanning beyond the initial Python scope.
@@ -530,7 +543,7 @@ DevKit CLI follows these principles:
 - Expanded documentation customization.
 - Advanced project templates and utilities.
 
-This README will be updated throughout development to reflect completed features, new commands, usage instructions, testing results, and changes to project scope.
+This README will be updated as development progresses to reflect completed features, new commands, usage instructions, testing results, and changes to project scope.
 
 ## Collaboration
 

@@ -79,6 +79,8 @@ Automates the creation of customizable project directories, folders, and empty f
 - Removes unnecessary whitespace and ignores empty folder entries.
 - Validates folder names, including rejecting `.` and `..`.
 - Allows letters, numbers, underscores, and hyphens in folder names.
+- Reserves `root` as a special destination for files placed directly in the project root.
+- Rejects `root` as an ordinary folder name.
 - Detects duplicate folder names.
 - Rejects invalid folder-name batches and prompts users to provide valid input again.
 - Reports successful and failed folder creation separately.
@@ -86,14 +88,18 @@ Automates the creation of customizable project directories, folders, and empty f
 - Supports `root` as the destination for files placed directly in the project root.
 - Validates folder mappings and rejects references to folders that were not created.
 - Accepts comma-separated filenames within mappings.
+- Rejects empty filenames.
 - Rejects filenames containing internal spaces and nested file paths.
 - Supports different file extensions without restricting users to Python files.
 - Supports extensionless filenames such as `Dockerfile` and dotfiles such as `.gitignore`.
 - Detects duplicate filenames.
+- Rejects invalid mapping batches and prompts users to re-enter the mappings.
+- Prevents file creation from a partially invalid mapping batch.
 - Creates empty files using `pathlib`.
 - Preserves existing files rather than overwriting their contents.
+- Skips existing files and tracks them separately from successful and failed file operations.
 - Handles filesystem errors during file creation.
-- Reports successful and failed file creation separately.
+- Reports successfully created, failed, and skipped files separately.
 
 **Example input:**
 
@@ -110,6 +116,10 @@ root: README.md, .gitignore
 ```
 
 The Project Generator creates the requested directories and empty files.
+
+If a mapping batch contains an invalid entry, DevKit rejects the batch and prompts the user to enter the mappings again. Files are not created from a partially invalid batch.
+
+If a requested file already exists, DevKit preserves it and counts it as skipped rather than overwriting it.
 
 It is language-agnostic and can support structures containing files such as `.py`, `.js`, `.ts`, `.go`, `.rs`, `.java`, `.cpp`, `.html`, and `.css`, as well as extensionless files and dotfiles.
 
@@ -321,9 +331,11 @@ tests: test_main.py
 root: README.md, .gitignore
 ```
 
-DevKit validates the requested folders and filenames, creates the accepted entries, and reports successful and failed operations separately.
+DevKit validates the requested folders and filenames, creates the accepted entries, and reports successful, failed, and skipped operations separately.
 
-Existing files are preserved rather than overwritten.
+If a mapping batch is invalid, DevKit prompts the user to re-enter the mappings before proceeding with file creation.
+
+Empty filenames are rejected, and existing files are preserved rather than overwritten.
 
 ### Run the Documentation Generator
 
@@ -419,7 +431,7 @@ Development follows an incremental approach.
 | 1 | Repository and initial project structure | Completed |
 | 2 | CLI foundation, subcommand registration, and command routing | Completed |
 | 3 | Environment Doctor | Completed |
-| 4 | Project Generator | Completed, reviewed, and merged |
+| 4 | Project Generator | Completed, refined, reviewed, and merged |
 | 5 | Documentation Generator | V1 completed, reviewed, and merged |
 | 6 | Project Doctor | V1 completed and merged |
 | 7 | Testing, debugging, and refinement | Completed for the current core implementation |
@@ -436,7 +448,7 @@ DevKit uses Python's `unittest` framework to verify functionality, expected beha
 The test suite covers:
 
 - **Environment Doctor:** Python version checks, Git detection, and Git error handling.
-- **Project Generator:** Project and folder validation, duplicate detection, file mappings, filesystem errors, and protection of existing files.
+- **Project Generator:** Project and folder validation, reserved folder names, duplicate detection, file mappings, invalid mapping retries, empty filename rejection, filesystem errors, and protection of existing files.
 - **Documentation Generator CLI workflow:** Missing API keys, successful generation, generation failures, overwrite approval and rejection, and file-writing errors.
 - **Documentation scanner:** Python file discovery, excluded directories, AST inspection, syntax errors, and unreadable files.
 - **AI client:** API key retrieval, successful API responses, request failures, and unexpected response structures.
@@ -444,9 +456,10 @@ The test suite covers:
 
 ### Current Test Results
 
-**Last verified test result: 53 automated tests passing.**
+**Latest verified test result: 57 automated tests passing.**
 
-- Passed: 53
+- Total tests: 57
+- Passed: 57
 - Failed: 0
 
 Run the complete test suite:
@@ -499,7 +512,12 @@ DevKit CLI follows these principles:
 - Project Generator implementation, validation, and automated tests.
 - Language-agnostic project structure creation.
 - Folder and file mapping validation.
-- Final folder-name validation improvements.
+- Reserved `root` destination validation.
+- Empty filename rejection.
+- Invalid mapping batch rejection and retry behaviour.
+- Prevention of partial file creation from invalid mapping batches.
+- Existing file preservation and skipped-file tracking.
+- Separate reporting of successful, failed, and skipped file operations.
 - Filesystem error handling and operation summaries.
 - Python project scanner.
 - AST-based inspection of functions, classes, and asynchronous functions.

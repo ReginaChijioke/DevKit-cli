@@ -1,4 +1,3 @@
-
 import unittest
 from argparse import Namespace
 from unittest.mock import patch, Mock
@@ -24,10 +23,8 @@ class TestEnvironmentDoctor(unittest.TestCase):
 
     def run_doctor_and_capture_output(self):
         output = StringIO()
-
         with redirect_stdout(output):
             run_doctor(Namespace())
-
         return output.getvalue()
 
     @patch("devkit.cli.subprocess.run")
@@ -64,7 +61,7 @@ class TestEnvironmentDoctor(unittest.TestCase):
 
     @patch("devkit.cli.subprocess.run")
     def test_python_version_below_requirement(self, mock_run):
-        mock_run.return_value = self.create_result(returncode=0)
+        mock_run.return_value = self.create_result()
 
         test_version = Mock()
         test_version.major = 3
@@ -150,14 +147,101 @@ class TestProjectGenerator(unittest.TestCase):
             ]
         )
 
-        self.assertTrue(Path("sample_project").is_dir())
-        self.assertTrue(Path("sample_project/src").is_dir())
-        self.assertTrue(Path("sample_project/tests").is_dir())
-        self.assertTrue(Path("sample_project/src/main.py").is_file())
-        self.assertTrue(Path("sample_project/src/config.py").is_file())
-        self.assertTrue(Path("sample_project/README.md").is_file())
+        project_path = Path("sample_project")
+
+        self.assertTrue(project_path.is_dir())
+        self.assertTrue((project_path / "src").is_dir())
+        self.assertTrue((project_path / "tests").is_dir())
+        self.assertTrue((project_path / "src" / "main.py").is_file())
+        self.assertTrue((project_path / "src" / "config.py").is_file())
+        self.assertTrue((project_path / "README.md").is_file())
         self.assertIn("3 created successfully.", output)
         self.assertIn("0 failed to create.", output)
+
+    def test_root_is_rejected_as_folder_name(self):
+        output = self.run_init_and_capture_output(
+            "reserved_root_test",
+            [
+                "src, root",
+                "src",
+                "src: main.py",
+                ""
+            ]
+        )
+
+        project_path = Path("reserved_root_test")
+
+        self.assertTrue((project_path / "src").is_dir())
+        self.assertFalse((project_path / "root").exists())
+        self.assertTrue((project_path / "src" / "main.py").is_file())
+        self.assertIn(
+            "root is reserved for project root files.",
+            output
+        )
+        self.assertIn("Invalid folder names. Please try again.", output)
+
+    def test_invalid_mapping_batch_retries_all_mappings(self):
+        output = self.run_init_and_capture_output(
+            "mapping_retry_test",
+            [
+                "src, docs",
+                "src: main.py",
+                "unknown: README.md",
+                "",
+                "src: config.py",
+                ""
+            ]
+        )
+
+        project_path = Path("mapping_retry_test")
+
+        self.assertFalse((project_path / "src" / "main.py").exists())
+        self.assertTrue((project_path / "src" / "config.py").is_file())
+        self.assertIn(
+            "Please re-enter all your folder/file mappings.",
+            output
+        )
+        self.assertIn("1 created successfully.", output)
+
+    def test_empty_filename_is_rejected_and_mapping_retried(self):
+        output = self.run_init_and_capture_output(
+            "empty_filename_test",
+            [
+                "src",
+                "src:",
+                "",
+                "src: main.py",
+                ""
+            ]
+        )
+
+        self.assertTrue(
+            Path("empty_filename_test/src/main.py").is_file()
+        )
+        self.assertIn("Empty filenames are not allowed.", output)
+        self.assertIn(
+            "Please re-enter all your folder/file mappings.",
+            output
+        )
+
+    def test_empty_mapping_submission_is_rejected(self):
+        output = self.run_init_and_capture_output(
+            "empty_mapping_test",
+            [
+                "src",
+                "",
+                "src: main.py",
+                ""
+            ]
+        )
+
+        self.assertTrue(
+            Path("empty_mapping_test/src/main.py").is_file()
+        )
+        self.assertIn(
+            "You must enter at least one mapping.",
+            output
+        )
 
     def test_project_directory_permission_error(self):
         with patch.object(Path, "mkdir", side_effect=PermissionError):
@@ -204,6 +288,7 @@ class TestProjectGenerator(unittest.TestCase):
                 "folder_error_test",
                 [
                     "src, tests, docs",
+                    "src: main.py",
                     ""
                 ]
             )
@@ -235,13 +320,10 @@ class TestProjectGenerator(unittest.TestCase):
                 ]
             )
 
-        self.assertFalse(
-            Path("file_error_test/src/main.py").exists()
-        )
-        self.assertTrue(
-            Path("file_error_test/src/config.py").is_file()
-        )
+        project_path = Path("file_error_test")
 
+        self.assertFalse((project_path / "src" / "main.py").exists())
+        self.assertTrue((project_path / "src" / "config.py").is_file())
         self.assertIn("Could not create main.py:", output)
         self.assertIn("Simulated file creation failure", output)
         self.assertIn("1 created successfully.", output)
@@ -282,10 +364,13 @@ class TestProjectGenerator(unittest.TestCase):
         self.assertTrue(
             Path("existing_file_test/src/config.py").is_file()
         )
-
         self.assertIn("File already exists.", output.getvalue())
         self.assertIn("1 created successfully.", output.getvalue())
         self.assertIn("0 failed to create.", output.getvalue())
+        self.assertIn(
+            "1 skipped because they already exist.",
+            output.getvalue()
+        )
 
     def test_invalid_project_name_is_rejected(self):
         output = self.run_init_and_capture_output(
@@ -312,13 +397,22 @@ class TestProjectGenerator(unittest.TestCase):
             [
                 "src",
                 "src: src/main.py",
+                "",
+                "src: main.py",
                 ""
             ]
         )
 
-        self.assertIn("Invalid filename", output)
+        project_path = Path("path_test")
+
         self.assertFalse(
-            Path("path_test/src/src/main.py").exists()
+            (project_path / "src" / "src" / "main.py").exists()
+        )
+        self.assertTrue((project_path / "src" / "main.py").is_file())
+        self.assertIn("Invalid filename", output)
+        self.assertIn(
+            "Please re-enter all your folder/file mappings.",
+            output
         )
 
     def test_parent_directory_filename_is_rejected(self):
@@ -327,11 +421,22 @@ class TestProjectGenerator(unittest.TestCase):
             [
                 "src",
                 "root: ..",
+                "",
+                "root: README.md",
                 ""
             ]
         )
 
+        project_path = Path("parent_test")
+
+        self.assertTrue((project_path / "README.md").is_file())
         self.assertIn("Invalid filename", output)
+        self.assertIn(
+            "Please re-enter all your folder/file mappings.",
+            output
+        )
+        self.assertIn("1 created successfully.", output)
+        self.assertIn("0 failed to create.", output)
 
     def test_invalid_folder_mapping_is_rejected(self):
         output = self.run_init_and_capture_output(
@@ -339,12 +444,21 @@ class TestProjectGenerator(unittest.TestCase):
             [
                 "src",
                 "unknown: main.py",
+                "",
+                "src: main.py",
                 ""
             ]
         )
 
+        project_path = Path("mapping_test")
+
+        self.assertFalse((project_path / "main.py").exists())
+        self.assertTrue((project_path / "src" / "main.py").is_file())
         self.assertIn("Folder does not exist", output)
-        self.assertFalse(Path("mapping_test/main.py").exists())
+        self.assertIn(
+            "Please re-enter all your folder/file mappings.",
+            output
+        )
 
     def test_invalid_mapping_format_is_rejected(self):
         output = self.run_init_and_capture_output(
@@ -352,11 +466,20 @@ class TestProjectGenerator(unittest.TestCase):
             [
                 "src",
                 "src main.py",
+                "",
+                "src: main.py",
                 ""
             ]
         )
 
+        self.assertTrue(
+            Path("format_test/src/main.py").is_file()
+        )
         self.assertIn("Invalid folder/file format.", output)
+        self.assertIn(
+            "Please re-enter all your folder/file mappings.",
+            output
+        )
 
     def test_invalid_folder_names_are_rejected(self):
         output = self.run_init_and_capture_output(
@@ -366,6 +489,7 @@ class TestProjectGenerator(unittest.TestCase):
                 "my folder",
                 "..",
                 "src, test_files, my-project",
+                "src: main.py",
                 ""
             ]
         )
@@ -381,10 +505,7 @@ class TestProjectGenerator(unittest.TestCase):
             {"src", "test_files", "my-project"}
         )
 
-        self.assertIn(
-            "Folder name must start with a letter.",
-            output
-        )
+        self.assertIn("Folder name must start with a letter.", output)
         self.assertIn(
             "Folder name can only contain letters, numbers, underscores and hyphens.",
             output
@@ -393,7 +514,6 @@ class TestProjectGenerator(unittest.TestCase):
             "Folder name cannot be '.' or '..'.",
             output
         )
-
         self.assertIn("Invalid folder names. Please try again.", output)
         self.assertIn("3 created successfully.", output)
         self.assertIn("0 failed to create.", output)
@@ -404,19 +524,21 @@ class TestProjectGenerator(unittest.TestCase):
             [
                 "src, tests, src, docs, tests",
                 "src, tests, docs",
+                "src: main.py",
                 ""
             ]
         )
 
-        self.assertTrue(Path("duplicate_folder_test/src").is_dir())
-        self.assertTrue(Path("duplicate_folder_test/tests").is_dir())
-        self.assertTrue(Path("duplicate_folder_test/docs").is_dir())
+        project_path = Path("duplicate_folder_test")
+
+        self.assertTrue((project_path / "src").is_dir())
+        self.assertTrue((project_path / "tests").is_dir())
+        self.assertTrue((project_path / "docs").is_dir())
 
         self.assertIn(
             "Duplicate folder: 'src' has already been requested",
             output
         )
-
         self.assertIn("Invalid folder names. Please try again.", output)
         self.assertIn("3 created successfully.", output)
         self.assertIn("0 failed to create.", output)
@@ -427,21 +549,24 @@ class TestProjectGenerator(unittest.TestCase):
             [
                 "src",
                 "src: main.py, main.py",
+                "",
+                "src: main.py",
                 ""
             ]
         )
 
-        self.assertTrue(
-            Path("duplicate_file_test/src/main.py").is_file()
-        )
+        project_path = Path("duplicate_file_test")
+
+        self.assertTrue((project_path / "src" / "main.py").is_file())
         self.assertEqual(
-            len(list(Path("duplicate_file_test/src").iterdir())),
+            len(list((project_path / "src").iterdir())),
             1
         )
-
         self.assertIn("Duplicate filename.", output)
-        self.assertIn("1 created successfully.", output)
-        self.assertIn("0 failed to create.", output)
+        self.assertIn(
+            "Please re-enter all your folder/file mappings.",
+            output
+        )
 
     def test_filenames_with_spaces_are_rejected_and_other_extensions_accepted(self):
         output = self.run_init_and_capture_output(
@@ -449,23 +574,24 @@ class TestProjectGenerator(unittest.TestCase):
             [
                 "src",
                 "root: my file.py, main.go",
+                "",
+                "root: main.go",
                 ""
             ]
         )
 
-        self.assertFalse(
-            Path("language_agnostic_test/my file.py").exists()
-        )
-        self.assertTrue(
-            Path("language_agnostic_test/main.go").is_file()
-        )
+        project_path = Path("language_agnostic_test")
 
+        self.assertFalse((project_path / "my file.py").exists())
+        self.assertTrue((project_path / "main.go").is_file())
         self.assertIn(
             "Invalid filename: spaces are not allowed.",
             output
         )
-        self.assertIn("1 created successfully.", output)
-        self.assertIn("1 failed to create.", output)
+        self.assertIn(
+            "Please re-enter all your folder/file mappings.",
+            output
+        )
 
 
 class TestDocumentationGenerator(unittest.TestCase):

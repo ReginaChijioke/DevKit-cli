@@ -1123,3 +1123,107 @@ Planned activities:
 8. Complete the final checks before publishing to PyPI.
 
 **Milestone outcome:** DevKit's four core CLI features have been implemented, tested, and integrated into the main development branch. Core feature development is complete, and the project is moving into final packaging and PyPI release preparation.
+
+
+## 27 November 2026 — Project Generator Validation and Retry Improvements
+
+**Time:** 10:48 AM WAT
+
+### Milestone: Improved Project Generator Input Validation and Automated Testing
+
+Continued refining the Project Generator following feedback from a mentor review session. The focus was improving the handling of invalid user input and making the file-generation workflow safer and easier to recover from.
+
+### 1. Folder Name Validation
+
+- Added a check to reserve `root` as a special destination for files placed directly in the project directory.
+- Prevented users from using `root` as an ordinary folder name.
+- Added a clear validation message explaining that `root` is reserved for project-root files.
+
+### 2. File Mapping Validation and Retry Behaviour
+
+- Improved the grouped folder/file mapping workflow.
+- Added a retry mechanism when a submitted mapping batch contains invalid entries.
+- Ensured that files are not created from a partially invalid mapping batch.
+- Prompted users to re-enter all mappings when the submitted batch fails validation.
+- Added explicit rejection of empty filenames.
+- Preserved validation for invalid mapping formats, unknown destination folders, duplicate filenames, spaces, and nested paths.
+
+### 3. Existing File Handling and Operation Summary
+
+- Improved the handling of files that already exist in the requested destination.
+- Existing files are skipped rather than overwritten.
+- Added a separate skipped-file counter.
+- Updated the final file-generation summary to report:
+  - Files created successfully.
+  - Files that failed to create.
+  - Existing files skipped.
+
+This provides clearer feedback about the outcome of each file-generation operation.
+
+### 4. Automated Testing
+
+Updated `tests/test_cli.py` to cover the improved Project Generator behaviour.
+
+Additional and updated test coverage includes:
+
+- Rejection of `root` as a folder name.
+- Retrying invalid mapping batches.
+- Rejection of empty filenames.
+- Rejection of empty mapping submissions.
+- Correct handling of parent-directory filename attempts.
+- Verification that existing files are preserved and counted as skipped.
+- Verification that invalid mapping batches do not result in partial file creation.
+
+**Test command:**
+
+```bash
+python3 -m unittest discover -v
+```
+
+**Full test result:**
+
+- Total tests: 57
+- Passed: 57
+- Failed: 0
+
+All 57 automated tests passed successfully.
+
+### 5. Concepts Practised
+
+- Input validation.
+- Nested `while` loops.
+- Boolean validation flags.
+- `break` and `continue`.
+- List management and duplicate detection.
+- String processing using `strip()` and `split()`.
+- Filesystem operations using `pathlib`.
+- Handling existing files safely.
+- Operation counters and summary reporting.
+- Automated testing with `unittest`.
+- Mocking interactive user input.
+
+### 6. Design Decisions
+
+- The special destination `root` must remain reserved for files placed directly in the project directory.
+- Invalid mapping batches should be rejected and re-entered before file creation begins.
+- Empty filenames should never be accepted.
+- Existing files should be preserved and skipped instead of overwritten.
+- Successful, failed, and skipped file operations should be reported separately.
+- The Project Generator should give users an opportunity to correct invalid input instead of forcing them to restart the entire project-generation process.
+
+### 7. Current Status
+
+- Environment Doctor: Implemented and tested.
+- Project Generator: Implemented, refined, and tested.
+- Documentation Generator: V1 implemented and tested.
+- Project Doctor: V1 implemented and tested.
+- Package configuration and external installation testing: Completed.
+- Automated tests: **57 passing, 0 failures.**
+- PyPI publication: Pending.
+
+### 8. Next Steps
+
+- Review the updated README and development log.
+- Verify the complete set of changes.
+- Commit and push the latest implementation, tests, and documentation updates.
+- Continue final release preparation for DevKit CLI.

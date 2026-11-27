@@ -88,6 +88,10 @@ def run_init(parsed_argument):
         all_folders_valid = True
         for name in folder_names:
             cleaned_name = name.strip()
+            if cleaned_name == "root":
+                print("root is reserved for project root files.")
+                all_folders_valid = False
+                break
             if not cleaned_name:
                 print("Folder name cannot be empty.")
                 all_folders_valid = False
@@ -128,59 +132,94 @@ def run_init(parsed_argument):
         except OSError as error:
             failed_folders += 1
             print(f"Could not create {name}: {error}")
-    grouped_file_entries = []
-    while True:
-        folder_file_mapping = input("Enter folder/file mapping: ")
-        if folder_file_mapping == "":
-            break
-        else:
-            grouped_file_entries.append(folder_file_mapping)
     successful_files = 0
     failed_files = 0
-    for entry in grouped_file_entries:
-        folder, separator, files = entry.partition(":")
-        if separator == "":
-            print("Invalid folder/file format.")
+    skipped_files = 0
+    while True:
+        mappings_valid = True
+        grouped_file_entries = []
+        validated_mappings = []
+        print("""Enter folder/file mappings in this format:
+        folder_name: file1.py, file2.py
+        For files in the project root, use:
+        root: README.md, requirements.txt
+        Press Enter when you are finished.
+        """)
+        while True:  
+            folder_file_mapping = input("Enter folder/file mapping: ")
+            if folder_file_mapping == "":
+                break
+            else:
+                grouped_file_entries.append(folder_file_mapping)
+        if not grouped_file_entries:
+            print("You must enter at least one mapping.")
             continue
+        for entry in grouped_file_entries:
+            entry_valid = True
+            folder, separator, files = entry.partition(":")
+            if separator == "":
+                print("Invalid folder/file format.")
+                entry_valid = False
+                mappings_valid = False
+                continue
 
-        cleaned_folder = folder.strip()
-        if cleaned_folder == "root":
-            destination_path = project_path
-        elif cleaned_folder not in cleaned_names:
-            print("Folder does not exist")
+            cleaned_folder = folder.strip()
+            if cleaned_folder == "root":
+                destination_path = project_path
+            elif cleaned_folder not in cleaned_names:
+                print("Folder does not exist")
+                entry_valid = False
+                mappings_valid = False
+                continue
+            else:
+                destination_path = project_path / cleaned_folder 
+                if not destination_path.is_dir():
+                    print("Folder path does not exist.")
+                    entry_valid = False
+                    mappings_valid = False
+                    continue
+            split_files = files.split(",")
+            cleaned_file_names = []
+            for each_file in split_files:
+                stripped_file = each_file.strip()
+                if stripped_file == "":
+                    print("Empty filenames are not allowed.")
+                    entry_valid = False
+                    mappings_valid = False
+                    continue
+                if len(stripped_file.split()) > 1:
+                    print("Invalid filename: spaces are not allowed.")
+                    entry_valid = False
+                    mappings_valid = False
+                    continue
+                file_name = Path(stripped_file).name
+                if stripped_file != file_name:
+                    print("Invalid filename")
+                    entry_valid = False
+                    mappings_valid = False
+                    continue
+                if file_name == "" or file_name == "." or file_name == "..":
+                    print("Invalid filename")
+                    entry_valid = False
+                    mappings_valid = False
+                    continue
+                if file_name in cleaned_file_names:
+                    print("Duplicate filename.")
+                    entry_valid = False
+                    mappings_valid = False
+                    continue
+                cleaned_file_names.append(file_name)
+            if entry_valid:
+                validated_mappings.append((destination_path, cleaned_file_names))
+        if not mappings_valid:
+            print("Please re-enter all your folder/file mappings.")
             continue
-        else:
-            destination_path = project_path / cleaned_folder 
-            if not destination_path.is_dir():
-                print("Folder path does not exist.")
-                continue
-        split_files = files.split(",")
-        cleaned_file_names = []
-        for each_file in split_files:
-            stripped_file = each_file.strip()
-            if stripped_file == "":
-                continue
-            if len(stripped_file.split()) > 1:
-                print("Invalid filename: spaces are not allowed.")
-                failed_files += 1
-                continue
-            file_name = Path(stripped_file).name
-            if stripped_file != file_name:
-                print("Invalid filename")
-                failed_files += 1
-                continue
-            if file_name == "" or file_name == "." or file_name == "..":
-                print("Invalid filename")
-                failed_files += 1
-                continue
-            if file_name in cleaned_file_names:
-                print("Duplicate filename.")
-                failed_files += 1
-                continue
-            cleaned_file_names.append(file_name)
+        break
+    for destination_path, cleaned_file_names in validated_mappings:
         for file in cleaned_file_names:
             create_path = destination_path / file
             if create_path.exists():
+                skipped_files += 1
                 print("File already exists.")
                 continue
             try: 
@@ -195,6 +234,7 @@ def run_init(parsed_argument):
     print("Files:")
     print(f"{successful_files} created successfully.")
     print(f"{failed_files} failed to create.")
+    print(f"{skipped_files} skipped because they already exist.")
 register_init.set_defaults(func=run_init)
 
 def run_docs(parsed_argument):
